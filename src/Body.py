@@ -9,7 +9,7 @@ class Body:
     '''
     Init function takes body mass, radius (in km), and color
     '''
-    def __init__(m, r, c):
+    def __init__(self, m, r, c):
         self.mass = m
         self.radius = r
         self.color = c
@@ -33,3 +33,8 @@ EARTH = Body(5.97e24, 6378, "b")
 Earth's moon
 '''
 MOON = Body(7.34e22, 1738, "silver")
+
+'''
+Near-Earth asteroid Bennu
+'''
+BENNU = Body(78e9, 0.28, "darkgray")

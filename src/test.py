@@ -16,10 +16,7 @@ print(calc_grav_force(spacecraft["mass"], earth["mass"], 100000))
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.patches import Ellipse
-import matplotlib.image as image
-from matplotlib.cbook import get_sample_data
-import imageio
+
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
