@@ -15,8 +15,8 @@ print(calc_grav_force(spacecraft["mass"], earth["mass"], 100000))
 '''
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import numpy as np
-
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -50,6 +50,12 @@ theta = np.mgrid[0:2*np.pi:15j]
 x = major_axis * np.cos(np.linspace(0, 2 * np.pi))
 y = minor_axis * np.sin(np.linspace(0, 2 * np.pi))
 
-ax.plot(x, y + 5, zs = 0, zdir = "z", color = "r")
+p = ax.plot(x, y + 5, zs = 0, zdir = "z", color = "r")
+
+def update(i):
+    print(i)
+    #p.set_data(x[i], y[i])
+
+a = animation.FuncAnimation(fig, update, 25, interval = 50, blit = False)
 
 plt.show()
