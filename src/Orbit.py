@@ -11,7 +11,7 @@ class Orbit:
     '''
     Init function takes orbit apogee (in km), perigee (in km), and inclination (in degrees)
     '''
-    def __init__(a, p , i):
+    def __init__(self, a, p , i):
         self.apogee = a
         self.perigee = p
         self.inclination = i
