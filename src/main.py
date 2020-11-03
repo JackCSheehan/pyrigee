@@ -7,7 +7,7 @@ from Body import *
 from Craft import *
 from Orbit import *
 
-orbit = Orbit(40000, 600, 0)
+orbit = Orbit(400, 400, 25)
 body = EARTH
 craft = ISS
 

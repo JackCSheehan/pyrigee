@@ -19,6 +19,9 @@ to show body proportionally by matplotlib
 '''
 LIMIT_OFFSET_DIVISOR = 4252
 
+# Interval in ms for animations
+ANIMATION_INTERVAL = 120
+
 '''
 Private helper function to plot the body given in the plot function. Takes the body to
 plot and ax, which is the matplotlib 3D axes
@@ -59,16 +62,38 @@ def __plot_body(body, ax):
 Private helper function to animate craft orbit around body. Takes the frame given by
 the the matplotlib timer; the x, y, and y coords of an orbit, and the plot of a craft
 '''
-def __animate_craft(frame, x, y, z, craft_point):
+def __animate_craft(frame, x, y, z, craft_point, craft_text):
     # Set offsets of point
     craft_point.set_offsets(np.append(x[frame], y[frame]))
     craft_point.set_3d_properties(z[frame], "z")
+
+    # Set offsets of text to follow point
+    craft_text.set_position(np.append(x[frame], y[frame]))
+    craft_text.set_3d_properties(z[frame], None)
 
 def plot(body, orbit, craft):
 
     # Standard matplotlib initialization items
     fig = plt.figure()
     ax = fig.add_subplot(111, projection = "3d")
+    
+    # Set background colors to black
+    fig.patch.set_facecolor("k")
+    ax.set_facecolor("k")
+
+    # Change axis colors to white
+    ax.xaxis.label.set_color("white")
+    ax.yaxis.label.set_color("white")
+    ax.zaxis.label.set_color("white")
+    ax.tick_params(axis = "x", colors = "white")
+    ax.tick_params(axis = "y", colors = "white")
+    ax.tick_params(axis = "z", colors = "white")
+    
+    # Change grid fill to black and grid lines to white
+    ax.w_xaxis.set_pane_color((0, 0, 0, 0))
+    ax.w_yaxis.set_pane_color((0, 0, 0, 0))
+    ax.w_zaxis.set_pane_color((0, 0, 0, 0))
+    ax.grid(color = "red")
 
     # Plot the given body
     __plot_body(body, ax)
@@ -105,27 +130,37 @@ def plot(body, orbit, craft):
     # Calculate x and y points of the orbit ellipse
     x = major_axis * np.cos(np.linspace(0, 2 * np.pi))
     y = minor_axis * np.sin(np.linspace(0, 2 * np.pi))
-    z = np.linspace(0, 50)
+    #z = x * np.tan(np.radians(orbit.inclination))
+
+    #print(z)
+    print(center_to_focus_distance / side_to_focus_distance)
+    print(side_to_focus_distance)
+
+    orbit_offset = 0
+
+    # If elliptical orbit, move orbit so body is in focus of orbit
+    if orbit.apogee != orbit.perigee:
+        orbit_offset = (semi_major_axis + body.radius) / TICK_VALUE
 
     # Plot orbit based on calculated coordinates and given craft color. Offset orbit to put body at focus
-    ax.plot(x + ((semi_major_axis + body.radius) / TICK_VALUE), y, zs = 0, zdir = "z", color = craft.color)
+    orbit_plot = ax.plot(x + orbit_offset, y, zs = 0, zdir = "z", color = craft.color)
 
     # Plot point and text at apogee
     ax.scatter((orbit.apogee + body.radius) / TICK_VALUE, 0, 0, color = craft.color)
-    ax.text((orbit.apogee + body.radius) / TICK_VALUE, 0, 0, "Apogee")
+    ax.text((orbit.apogee + body.radius) / TICK_VALUE, 0, 0, "Apogee", color = "white")
 
     # Plot point and text at perigee
     ax.scatter((-orbit.perigee - body.radius) / TICK_VALUE, 0, 0, color = craft.color)
-    ax.text((-orbit.perigee - body.radius) / TICK_VALUE, 0, 0, "Perigee")
+    ax.text((-orbit.perigee - body.radius) / TICK_VALUE, 0, 0, "Perigee", color = "white")
 
     # Plot spacecraft at apogee
     craft_point = ax.scatter((orbit.apogee + body.radius) / TICK_VALUE, 0, 0, color = craft.color)
-    ax.text((orbit.apogee + body.radius) / TICK_VALUE, 0, 0, craft.name)
+    craft_text = ax.text((orbit.apogee + body.radius) / TICK_VALUE, 0, 0, craft.name, color = "white")
 
     # Animate spacecraft. Must be assigned to a variable to work
-    a = animation.FuncAnimation(fig, __animate_craft, frames = 50, fargs = (x, y, x, craft_point), blit = False, interval = 1, repeat = True)
+    #a = animation.FuncAnimation(fig, __animate_craft, frames = x.size, fargs = (x + orbit_offset, y, x, craft_point, craft_text), blit = False, interval = ANIMATION_INTERVAL, repeat = True)
 
-    ax.view_init(azim = 0, elev = 90)
+    #ax.view_init(azim = 0, elev = 90)
 
     # Show the matplotlib window
     plt.show()
