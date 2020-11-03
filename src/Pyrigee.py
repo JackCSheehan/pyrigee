@@ -7,8 +7,11 @@ import matplotlib.animation as animation
 import numpy as np
 import math
 
-# The number of divisions in wireframe plots or line plots
-DIVS = 15j
+# The number of divisions in wireframe plots for bodies
+PLANET_DIVS = 15j
+
+# The number of divisions in orbit plots
+ORBIT_DIVS = 51
 
 # The number of km that each tick represents
 TICK_VALUE = 1000
@@ -29,7 +32,7 @@ plot and ax, which is the matplotlib 3D axes
 def __plot_body(body, ax):
 
     # Create theta and phi values that run from 0 to 2pi and 0 to pi, respectively
-    theta, phi = np.mgrid[0:2 * np.pi:DIVS, 0:np.pi:DIVS]
+    theta, phi = np.mgrid[0:2 * np.pi:PLANET_DIVS, 0:np.pi:PLANET_DIVS]
 
     '''
     Calculate x, y, and z of sphere given theta and phi ranges. Divide each radius by tick value to make sure
@@ -213,15 +216,23 @@ def plot(body, orbit, craft):
     scaled_eccentricity = (scaled_apogee - scaled_perigee) / (scaled_apogee + scaled_perigee)
 
     # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-    r = (semi_major_axis * (1 - scaled_eccentricity**2)) / (1 - scaled_eccentricity * np.cos(np.linspace(0, 2 * np.pi)))
+    r = (semi_major_axis * (1 - scaled_eccentricity**2)) / (1 - scaled_eccentricity * np.cos(np.linspace(0, 2 * np.pi, ORBIT_DIVS)))
 
     # Convert polar equations to cartesean coords based on the given orbital inclination
-    x = r * np.cos(np.linspace(0, 2 * np.pi)) * np.cos(np.radians(orbit.inclination))
-    y = r * np.sin(np.linspace(0, 2 * np.pi))
-    z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi))
+    x = r * np.cos(np.linspace(0, 2 * np.pi, ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+    y = r * np.sin(np.linspace(0, 2 * np.pi, ORBIT_DIVS))
+    z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, ORBIT_DIVS))
 
     # Plot the orbit after scaling x and y coords to display in the correct units on graph
     orbit_plot = ax.plot(x / TICK_VALUE, y / TICK_VALUE, z / TICK_VALUE, zdir = "z", color = craft.color)
+
+    # Plot point and text at apogee
+    ax.scatter(x[0] / TICK_VALUE, y[0] / TICK_VALUE, z[0] / TICK_VALUE, color = craft.color)
+    ax.text(x[0] / TICK_VALUE, y[0] / TICK_VALUE, z[0] / TICK_VALUE, "Apogee", color = "white")
+
+    # Plot point and text at perigee
+    ax.scatter(x[int((x.size) / 2)] / TICK_VALUE, y[int((y.size) / 2)] / TICK_VALUE, z[int((z.size)/ 2)] / TICK_VALUE, color = craft.color)
+    ax.text(x[int((x.size)/ 2)] / TICK_VALUE, y[int((y.size)/ 2)] / TICK_VALUE, z[int((z.size) / 2)] / TICK_VALUE, "Perigee", color = "white")
 
     # Set default view to see planet from convenient angle
     ax.view_init(azim = 45, elev = 20)
