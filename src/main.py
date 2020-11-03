@@ -2,13 +2,13 @@
 Example usage of Pyrigee
 '''
 
-import Pyrigee
-from Body import *
-from Craft import *
-from Orbit import *
+import pyrigee
+from body import *
+from craft import *
+from orbit import *
 
 orbit = Orbit(400, 400, 0)
 body = EARTH
 craft = ISS
 
-Pyrigee.plot(body, orbit, craft)
+pyrigee.plot(body, orbit, craft)

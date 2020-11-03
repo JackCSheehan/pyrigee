@@ -197,7 +197,9 @@ def plot(body, orbit, craft):
     ax.w_xaxis.set_pane_color((0, 0, 0, 0))
     ax.w_yaxis.set_pane_color((0, 0, 0, 0))
     ax.w_zaxis.set_pane_color((0, 0, 0, 0))
-    ax.grid(color = "red")
+
+    # Set legend to have black background
+    ax.legend(facecolor = "red")
 
     # Plot the given body
     __plot_body(body, ax)
@@ -224,7 +226,7 @@ def plot(body, orbit, craft):
     z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, ORBIT_DIVS))
 
     # Plot the orbit after scaling x and y coords to display in the correct units on graph
-    orbit_plot = ax.plot(x / TICK_VALUE, y / TICK_VALUE, z / TICK_VALUE, zdir = "z", color = craft.color)
+    orbit_plot = ax.plot(x / TICK_VALUE, y / TICK_VALUE, z / TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
 
     # Plot point and text at apogee
     ax.scatter(x[0] / TICK_VALUE, y[0] / TICK_VALUE, z[0] / TICK_VALUE, color = craft.color)
@@ -236,6 +238,9 @@ def plot(body, orbit, craft):
 
     # Set default view to see planet from convenient angle
     ax.view_init(azim = 45, elev = 20)
+
+    # Show legend for orbits of given craft
+    l = ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
 
     # Show the matplotlib window after setting layout to tight to ensure subplot takes up as much of fig as possible
     plt.tight_layout()
