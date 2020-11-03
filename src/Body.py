@@ -28,7 +28,7 @@ SUN = Body("Sun", 1.99e30, 695700, "y")
 '''
 The Earth
 '''
-EARTH = Body("Earth", 5.97e24, 6378, "b")
+EARTH = Body("Earth", 5.97e24, 6378, "cornflowerblue")
 
 '''
 Earth's moon

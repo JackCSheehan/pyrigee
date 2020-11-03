@@ -21,7 +21,7 @@ Sample Craft constants representing some famous crafts
 '''
 NASA's Space Shuttle. Mass based on shuttle wet mass
 '''
-SPACE_SHUTTLE = Craft("Space Shuttle", 110000, "k")
+SPACE_SHUTTLE = Craft("Space Shuttle", 110000, "white")
 
 '''
 The first man-made object in orbit, the Soviet Union's Sputnik 1
