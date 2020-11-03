@@ -215,14 +215,16 @@ def plot(body, orbit, craft):
     # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
     r = (semi_major_axis * (1 - scaled_eccentricity**2)) / (1 - scaled_eccentricity * np.cos(np.linspace(0, 2 * np.pi)))
 
-    # Convert polar equations to cartesean coords
-    x = r * np.cos(np.linspace(0, 2 * np.pi))
+    # Convert polar equations to cartesean coords based on the given orbital inclination
+    x = r * np.cos(np.linspace(0, 2 * np.pi)) * np.cos(np.radians(orbit.inclination))
     y = r * np.sin(np.linspace(0, 2 * np.pi))
+    z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi))
 
     # Plot the orbit after scaling x and y coords to display in the correct units on graph
-    orbit_plot = ax.plot(x / TICK_VALUE, y / TICK_VALUE, zs = 0, zdir = "z", color = craft.color)
+    orbit_plot = ax.plot(x / TICK_VALUE, y / TICK_VALUE, z / TICK_VALUE, zdir = "z", color = craft.color)
 
-    ax.view_init(azim = 0, elev = 90)
+    # Set default view to see planet from convenient angle
+    ax.view_init(azim = 45, elev = 20)
 
     # Show the matplotlib window after setting layout to tight to ensure subplot takes up as much of fig as possible
     plt.tight_layout()
