@@ -6,6 +6,7 @@ File containing definition of Body class and relevent constants
 Class used for defining bodies for spacecraft to orbit around
 '''
 class Body:
+    
     '''
     Init function takes body mass, radius (in km), and color
     '''

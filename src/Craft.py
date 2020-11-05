@@ -6,6 +6,7 @@ File containing definition of Craft class and relevant constants
 Class used for defining spacecraft to orbit a body
 '''
 class Craft:
+
     '''
     Init function takes craft's name, mass (in kg) and the craft's color
     '''
@@ -31,7 +32,7 @@ SPUTNIK_1 = Craft("Sputnik 1", 84, "dimgray")
 '''
 The International Space Station
 '''
-ISS = Craft("ISS", 420000, "orangered")
+ISS = Craft("ISS", 420000, "salmon")
 
 '''
 The Soviet Union's/Russia's Mir space station
