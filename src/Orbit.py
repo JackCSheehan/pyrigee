@@ -8,6 +8,7 @@ from enum import Enum
 Class that allows users to define custom orbits
 '''
 class Orbit:
+    
     '''
     Init function takes orbit apogee (in km), perigee (in km), and inclination (in degrees)
     '''
