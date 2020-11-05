@@ -16,10 +16,13 @@ class Pyrigee:
     __PLANET_DIVS = 9j
 
     # The number of divisions in orbit plots
-    __ORBIT_DIVS = 39
+    __ORBIT_DIVS = 51
 
     # The number of km that each tick represents
     __TICK_VALUE = 1000
+
+    # The difference between 1 and the eccentricity when orbit is considered parabolic
+    __EPSILON_E = .1
 
     ''' 
     Offset for graph x/y limits to ensure graph looks proportional. Divide body by 4252 to get the offset 
@@ -106,56 +109,89 @@ class Pyrigee:
         craft_text.set_3d_properties(z[frame], None)
 
     '''
+    Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
+    Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
+    length
+    '''
+    def __plot_elliptical_orbit(self, body, orbit, craft, scaled_eccentricity, semi_major_axis):
+        # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
+        r = (semi_major_axis * (1 - scaled_eccentricity**2)) / (1 - scaled_eccentricity * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+
+        # Convert polar equations to cartesean coords based on the given orbital inclination
+        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+
+        # Plot the orbit after scaling x and y coords to display in the correct units on graph
+        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
+
+        # Plot point and text at apogee
+        self.__ax.scatter(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, color = craft.color)
+        self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, "Apogee", color = "white")
+
+        # Index of orbit coordinates of the orbit's perigee
+        perigee_coord_index = int(x.size / 2)
+
+        # Plot point and text at perigee
+        self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
+        self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
+
+    '''
+    Private helper function that plots parabolic orbits when the eccentricity is very close to 1
+    '''
+    def __plot_parabolic_orbit(self, body, orbit, craft, semi_major_axis):
+        # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
+        r = ((orbit.perigee) * 2 + (body.radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+
+        # Convert polar equations to cartesean coords based on the given orbital inclination
+        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+
+        # Plot the orbit after scaling x and y coords to display in the correct units on graph
+        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
+
+        # Index of orbit coordinates of the orbit's perigee
+        perigee_coord_index = int(x.size / 2)
+
+        # Plot point and text at perigee
+        self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
+        self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
+
+
+    '''
     Function to plot crafts and orbits. Takes a single body object that the crafts will orbit and
     a dictionary of Orbit object and Craft objects paired together. This function will graph each
     corresponding to each craft.
     '''
-    def plot(self, body, orbit_craft_pairs):
+    def plot(self, body, orbit, craft):
         # Plot the given body
         self.__plot_body(body)
 
-        # Iterate through dict of orbit/craft pairs and graph each one
-        for orbit, craft in orbit_craft_pairs.items():
-            # Calculate major __axis by adding apogee, perigee, and body diamter
-            major_axis = orbit.apogee + orbit.perigee + (2 * body.radius)
+        # Calculate major __axis by adding apogee, perigee, and body diamter
+        major_axis = orbit.apogee + orbit.perigee + (2 * body.radius)
 
-            # Calculate semi-major __axis from major __axi
-            semi_major_axis = major_axis / 2
+        # Calculate semi-major __axis from major __axi
+        semi_major_axis = major_axis / 2
 
-            # Scale the apogee and perigee so that it is relative to the body itself rather than (0, 0)
-            scaled_apogee = orbit.apogee + body.radius
-            scaled_perigee = orbit.perigee + body.radius
+        # Scale the apogee and perigee so that it is relative to the body itself rather than (0, 0)
+        scaled_apogee = orbit.apogee + body.radius
+        scaled_perigee = orbit.perigee + body.radius
 
-            # Calculate eccentricity of scaled orbit
-            scaled_eccentricity = (scaled_apogee - scaled_perigee) / (scaled_apogee + scaled_perigee)
+        # Calculate eccentricity of scaled orbit
+        scaled_eccentricity = (scaled_apogee - scaled_perigee) / (scaled_apogee + scaled_perigee)
 
-            # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-            r = (semi_major_axis * (1 - scaled_eccentricity**2)) / (1 - scaled_eccentricity * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+        if (1 - scaled_eccentricity < self.__EPSILON_E):
+            self.__plot_parabolic_orbit(body, orbit, craft, semi_major_axis)
+        else:
+            # Plot an elliptical orbit
+            self.__plot_elliptical_orbit(body, orbit, craft, scaled_eccentricity, semi_major_axis)
 
-            # Convert polar equations to cartesean coords based on the given orbital inclination
-            x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
-            y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
-            z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        # Set default view to see planet from convenient angle
+        self.__ax.view_init(azim = 45, elev = 20)
 
-            # Plot the orbit after scaling x and y coords to display in the correct units on graph
-            self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
-
-            # Plot point and text at apogee
-            self.__ax.scatter(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, color = craft.color)
-            self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, "Apogee", color = "white")
-
-            # Index of orbit coordinates of the orbit's perigee
-            perigee_coord_index = int(x.size / 2)
-
-            # Plot point and text at perigee
-            self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
-            self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
-
-            # Set default view to see planet from convenient angle
-            self.__ax.view_init(azim = 45, elev = 20)
-
-            # Show legend for orbits of given craft
-            self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
+        # Show legend for orbits of given craft
+        self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
 
     '''
     Function to show the matplotlib window

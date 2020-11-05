@@ -7,7 +7,7 @@ from body import *
 from craft import *
 from orbit import *
 
-body = EARTH
+body = MOON
 
 orbit1 = Orbit(400, 400, 0)
 craft1 = ISS
@@ -23,7 +23,7 @@ craft4 = SKYLAB
 
 p = Pyrigee()
 
-orbit_craft_pair = {orbit1 : craft1, orbit2 : craft2, orbit3 : craft3, orbit4 : craft4}
+orbit_craft_pair = {orbit1 : craft1}
 
-p.plot(body, orbit_craft_pair)
+p.plot(body, orbit1, craft1)
 p.visualize()
