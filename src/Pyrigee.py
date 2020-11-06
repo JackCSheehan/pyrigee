@@ -11,7 +11,6 @@ import math
 Class containing methods and constants that allows users to graph orbits
 '''
 class Pyrigee:
-
     # The number of divisions in wireframe plots for bodies
     __PLANET_DIVS = 9j
 
@@ -64,7 +63,6 @@ class Pyrigee:
     plot
     '''
     def __plot_body(self, body):
-
         # Create theta and phi values that run from 0 to 2pi and 0 to pi, respectively
         theta, phi = np.mgrid[0:2 * np.pi:self.__PLANET_DIVS, 0:np.pi:self.__PLANET_DIVS]
 
@@ -164,7 +162,7 @@ class Pyrigee:
     a dictionary of Orbit object and Craft objects paired together. This function will graph each
     corresponding to each craft.
     '''
-    def plot(self, body, orbit, craft):
+    def plot(self, body, orbit, craft, maneuver = None):
         # Plot the given body
         self.__plot_body(body)
 

@@ -6,7 +6,6 @@ File containing definition of Craft class and relevant constants
 Class used for defining spacecraft to orbit a body
 '''
 class Craft:
-
     '''
     Init function takes craft's name, mass (in kg) and the craft's color
     '''
