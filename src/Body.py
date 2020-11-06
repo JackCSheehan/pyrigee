@@ -2,13 +2,12 @@
 File containing definition of Body class and relevent constants
 '''
 
+import pyrigee_constants
+
 '''
 Class used for defining bodies for spacecraft to orbit around
 '''
 class Body:
-    # The gravitational constant
-    __BIG_G = 6.67430e-11
-
     '''
     Init function takes body mass, radius (in km), and color
     '''
@@ -23,13 +22,13 @@ class Body:
     in meters/second (SI units)
     '''
     def get_gravitational_acceleration(self, distance):
-        return ((self.__BIG_G * self.mass) / (((self.radius * 1000) + (distance * 1000))**2))
+        return ((pyrigee_constants.BIG_G * self.mass) / (((self.radius * 1000) + (distance * 1000))**2))
 
     '''
     Returns the standard gravitational parameter (mu = GM) for this body
     '''
     def get_std_gravitational_parameter(self):
-        return self.__BIG_G * self.mass
+        return pyrigee_constants.BIG_G * self.mass
 
 '''
 Sample Body constants representing some bodies in the universe. All radii

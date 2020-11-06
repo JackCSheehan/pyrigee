@@ -9,7 +9,8 @@ Class that allows users to define custom orbits
 '''
 class Orbit:
     '''
-    Init function takes orbit apogee (in km), perigee (in km), and inclination (in degrees)
+    Init function takes orbit apogee (in km), perigee (in km), and inclination (in degrees).
+    Apogee and perigee should be measured from the SURFACE of a body, not it's center
     '''
     def __init__(self, a, p , i):
         self.apogee = a
