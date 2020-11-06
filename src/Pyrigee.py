@@ -45,6 +45,11 @@ class Pyrigee:
         self.__fig.patch.set_facecolor("k")
         self.__ax.set_facecolor("k")
 
+        # Set x, y, z label to indicate that each tick is equal to the __TICK_VALUE constant
+        self.__ax.set_xlabel(f"{self.__TICK_VALUE} km")
+        self.__ax.set_ylabel(f"{self.__TICK_VALUE} km")
+        self.__ax.set_zlabel(f"{self.__TICK_VALUE} km")
+
         # Change axis colors to white
         self.__ax.xaxis.label.set_color("white")
         self.__ax.yaxis.label.set_color("white")
@@ -73,11 +78,6 @@ class Pyrigee:
         x = (body.radius / self.__TICK_VALUE) * np.cos(theta) * np.sin(phi)
         y = (body.radius / self.__TICK_VALUE) * np.sin(theta) * np.sin(phi)
         z = (body.radius / self.__TICK_VALUE) * np.cos(phi)
-
-        # Set x, y, z label to indicate that each tick is equal to the __TICK_VALUE constant
-        self.__ax.set_xlabel(f"{self.__TICK_VALUE} km")
-        self.__ax.set_ylabel(f"{self.__TICK_VALUE} km")
-        self.__ax.set_zlabel(f"{self.__TICK_VALUE} km")
 
         # Calculate graph offset to show body proportionally
         graph_offset = body.radius / self.__LIMIT_OFFSET_DIVISOR
@@ -111,9 +111,9 @@ class Pyrigee:
     Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
     length
     '''
-    def __plot_elliptical_orbit(self, body, orbit, craft, scaled_eccentricity, semi_major_axis):
+    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis):
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-        r = (semi_major_axis * (1 - scaled_eccentricity**2)) / (1 - scaled_eccentricity * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
         x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
@@ -172,18 +172,20 @@ class Pyrigee:
         # Calculate semi-major __axis from major __axi
         semi_major_axis = major_axis / 2
 
-        # Scale the apogee and perigee so that it is relative to the body itself rather than (0, 0)
-        scaled_apogee = orbit.apogee + body.radius
-        scaled_perigee = orbit.perigee + body.radius
+        # Calculate the apoapsis/periapsis (distances from center of mass) of orbit
+        apoapsis = orbit.apogee + body.radius
+        periapsis = orbit.perigee + body.radius
 
-        # Calculate eccentricity of scaled orbit
-        scaled_eccentricity = (scaled_apogee - scaled_perigee) / (scaled_apogee + scaled_perigee)
+        # Calculate eccentricity of orbit
+        eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
 
-        if (1 - scaled_eccentricity < self.__EPSILON_E):
+        # If eccentricity is sufficiently close to 1, plot a parabolic orbit
+        if (1 - eccentricity < self.__EPSILON_E):
             self.__plot_parabolic_orbit(body, orbit, craft, semi_major_axis)
+        
+        # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            # Plot an elliptical orbit
-            self.__plot_elliptical_orbit(body, orbit, craft, scaled_eccentricity, semi_major_axis)
+            self.__plot_elliptical_orbit(body, orbit, craft, eccentricity, semi_major_axis)
 
         # Set default view to see planet from convenient angle
         self.__ax.view_init(azim = 45, elev = 20)
