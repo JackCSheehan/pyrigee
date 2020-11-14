@@ -19,10 +19,10 @@ class Body:
 
     '''
     Returns the gravitational distance at the given distance (in km) from the SURFACE of this body 
-    in meters/second (SI units)
+    in km/s
     '''
     def get_gravitational_acceleration(self, distance):
-        return ((pyrigee_constants.BIG_G * self.mass) / (((self.radius * 1000) + (distance * 1000))**2))
+        return ((pyrigee_constants.BIG_G * self.mass) / ((self.radius + distance)**2))
 
     '''
     Returns the standard gravitational parameter (mu = GM) for this body

@@ -3,6 +3,7 @@ Class containing defintiion of Maneuver class and relevant constants
 '''
 import numpy as np
 import math
+from enum import Enum
 
 '''
 An enum of supported maneuver types
@@ -24,7 +25,7 @@ class Maneuver:
     '''
     def __init__(self, n, to, ty):
         self.name = n
-        self.target_orbit = t
+        self.target_orbit = to
         self.type = ty
 
     '''
@@ -116,6 +117,7 @@ class Maneuver:
     representing the initial orbit
     '''
     def __calculate_geostationary_transfer_delta_v(self, body, initial_orbit):
+        print("")
 
     '''
     Calculates the total delta-v needed to do this maneuver. Takes a Body object that represents object
@@ -147,7 +149,7 @@ class Maneuver:
                 raise ValueError("Both initial and target orbits must be circular when performing a Hohmann Transfer Orbit")
         
         # If the manuever type is a Bi-Elliptic Transfer
-        else if self.type == ManeuverType.BIELLIPTIC_TRANSFER
+        elif self.type == ManeuverType.BIELLIPTIC_TRANSFER:
 
             # Check that both initial and target orbits are circular
             if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
@@ -160,7 +162,7 @@ class Maneuver:
                 raise ValueError("Both initial and target orbits must be circular when performing a Bi-Elliptic Transfer")
 
         # If the manuever type is a simple inclination change
-        else if self.type == ManeuverType.INCLINATION_CHANGE:
+        elif self.type == ManeuverType.INCLINATION_CHANGE:
 
             # Check to make sure initial and final orbit shapes are the same
             if initial_orbit.apogee == self.target_orbit.apogee and initial_orbit.perigee == self.target_orbit.perigee:
