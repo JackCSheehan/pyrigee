@@ -166,15 +166,16 @@ class Pyrigee:
         # Plot the given body
         self.__plot_body(body)
 
-        # Calculate major __axis by adding apogee, perigee, and body diamter
-        major_axis = orbit.apogee + orbit.perigee + (2 * body.radius)
-
-        # Calculate semi-major __axis from major __axi
-        semi_major_axis = major_axis / 2
-
         # Calculate the apoapsis/periapsis (distances from center of mass) of orbit
         apoapsis = orbit.apogee + body.radius
         periapsis = orbit.perigee + body.radius
+
+        # Calculate major __axis by adding apogee, perigee, and body diamter
+        major_axis = apoapsis + periapsis
+
+        # Calculate semi-major __axis from major __axi
+        semi_major_axis = major_axis / 2
+        print(semi_major_axis)
 
         # Calculate eccentricity of orbit
         eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)

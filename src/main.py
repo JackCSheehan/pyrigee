@@ -6,19 +6,20 @@ from pyrigee import *
 from body import *
 from craft import *
 from orbit import *
-#from maneuver import *
+from maneuver import *
 
-body = EARTH
+body = SUN
 
 craft = ISS
 
 orbit1 = Orbit(400, 400, 0)
-orbit2 = Orbit(400, 400, 78)
+orbit2 = Orbit(800, 800, 0)
 
-#man = Maneuver("TLI", target_orbit)
+man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT)
 
-#print(body.get_std_gravitational_parameter() * 1000)
-#print(man.get_delta_v(body, orbit1))
+print(body.get_std_gravitational_parameter())
+print(body.get_gravitational_acceleration(1))
+print(man.get_delta_v(body, orbit1))
 
 p = Pyrigee()
 
