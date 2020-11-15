@@ -4,8 +4,11 @@ orbits and do other calculations
 '''
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.patches import Rectangle
 import numpy as np
 import math
+from orbit import *
+from maneuver import ManeuverType
 
 '''
 Class containing methods and constants that allows users to graph orbits
@@ -37,9 +40,13 @@ class Pyrigee:
     color settings 
     '''
     def __init__(self):
+        # Create string to hold text that will be shown on side of screen
+        self.__info_text = ""
+
         # Standard matplotlib initialization items
         self.__fig = plt.figure()
         self.__ax = self.__fig.add_subplot(111, projection = "3d", proj_type = "ortho")
+        self.__ax.format_coord = self.__format_coord
         
         # Set background colors to black
         self.__fig.patch.set_facecolor("k")
@@ -62,6 +69,9 @@ class Pyrigee:
         self.__ax.w_xaxis.set_pane_color((0, 0, 0, 0))
         self.__ax.w_yaxis.set_pane_color((0, 0, 0, 0))
         self.__ax.w_zaxis.set_pane_color((0, 0, 0, 0))
+
+    def __format_coord(self, x, y):
+        return self.__info_text
 
     '''
     Private helper function to plot the body given in the plot function. Takes the body to
@@ -109,30 +119,47 @@ class Pyrigee:
     '''
     Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
     Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
-    length
+    length. The next parameter indicates if only half the orbit should be plotted. plot_labels 
+    indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
+    whether or not the legend should be plotted
     '''
-    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis):
+    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis, plot_half = False, plot_labels = True, legend = True):
+        # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
+        pi_multiplier = -2
+
+        # If user only wants to plot half the orbit, change pi multiplier to -1, so that np.linspace goes from 0 to pi
+        if plot_half:
+            pi_multiplier = -1
+
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
-        y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
-        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+
+        craft_name = craft.name
+
+        # If no legend should be shown, set craft_name to blank
+        if not legend:
+            craft_name = ""
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
-        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
+        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft_name)
 
-        # Plot point and text at apogee
-        self.__ax.scatter(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, color = craft.color)
-        self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, "Apogee", color = "white")
+        # If plot_labels is true, plot points and labels at orbit's apogee and perigee
+        if plot_labels:
+            # Plot point and text at apogee
+            self.__ax.scatter(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, color = craft.color)
+            self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, "Apogee", color = "white")
 
-        # Index of orbit coordinates of the orbit's perigee
-        perigee_coord_index = int(x.size / 2)
+            # Index of orbit coordinates of the orbit's perigee
+            perigee_coord_index = int(x.size / 2)
 
-        # Plot point and text at perigee
-        self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
-        self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
+            # Plot point and text at perigee
+            self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
+            self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
 
     '''
     Private helper function that plots parabolic orbits when the eccentricity is very close to 1
@@ -156,13 +183,49 @@ class Pyrigee:
         self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
         self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
 
+    '''
+    Private method that plots a hohmann transfer orbit. Takes the body being orbited, the initial orbit,
+    the craft orbiting, and the target orbit
+    '''
+    def __plot_hohmann_transfer_orbit(self, body, initial_orbit, craft, maneuver):
+        # Get target orbit from manuever
+        target_orbit = maneuver.target_orbit
+
+        # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
+        transfer_apogee = target_orbit.apogee
+        transfer_perigee = initial_orbit.perigee
+        transfer_apoapsis = transfer_apogee + body.radius
+        transfer_periapsis = transfer_perigee + body.radius
+
+        # Calculate semi-major axis of transfer orbit
+        transfer_semi_major_axis = (transfer_apoapsis + transfer_periapsis) / 2
+
+        # Calculate eccentricity of transfer orbit
+        transfer_eccentricity = (transfer_apoapsis - transfer_periapsis) / (transfer_apoapsis + transfer_periapsis)
+
+        transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, target_orbit.inclination)
+
+        # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
+        self.__plot_elliptical_orbit(body, transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False)
+
+        # Append info about maneuver to info text
+        self.__info_text += f"{craft.name} Hohmann Transfer:\nΔV Needed: {maneuver.get_delta_v(body, initial_orbit) * 1000:.2f} m/s"
+
+    '''
+    Private helper function that calls the correct plotting function to plot the given manuever. Takes the
+    body being orbited, the initial orbit, the orbiting craft making the transfer, and the manuever
+    '''
+    def __plot_maneuver(self, body, initial_orbit, craft, maneuver):
+        # Plot orbit based on given type
+        if maneuver.type == ManeuverType.HOHMANN_TRANSFER_ORBIT:
+            self.__plot_hohmann_transfer_orbit(body, initial_orbit, craft, maneuver)
 
     '''
     Function to plot crafts and orbits. Takes a single body object that the crafts will orbit and
     a dictionary of Orbit object and Craft objects paired together. This function will graph each
-    corresponding to each craft.
+    corresponding to each craft. legend indicates whether or not the legend should be plotted
     '''
-    def plot(self, body, orbit, craft, maneuver = None):
+    def plot(self, body, orbit, craft, maneuver = None, legend = True):
         # Plot the given body
         self.__plot_body(body)
 
@@ -170,12 +233,11 @@ class Pyrigee:
         apoapsis = orbit.apogee + body.radius
         periapsis = orbit.perigee + body.radius
 
-        # Calculate major __axis by adding apogee, perigee, and body diamter
+        # Calculate major axis by adding apogee, perigee, and body diamter
         major_axis = apoapsis + periapsis
 
-        # Calculate semi-major __axis from major __axi
+        # Calculate semi-major axis from major axis
         semi_major_axis = major_axis / 2
-        print(f"Semi major axis: {semi_major_axis}")
 
         # Calculate eccentricity of orbit
         eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
@@ -186,13 +248,24 @@ class Pyrigee:
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            self.__plot_elliptical_orbit(body, orbit, craft, eccentricity, semi_major_axis)
+            self.__plot_elliptical_orbit(body, orbit, craft, eccentricity, semi_major_axis, False, True, legend)
+
+        # If user included a manuever, plot the manuever
+        if maneuver != None:
+            self.__plot_maneuver(body, orbit, craft, maneuver)
+
+            # After plotting manuever, plot orbit transferred in
+            self.plot(body, maneuver.target_orbit, craft, None, False)
 
         # Set default view to see planet from convenient angle
         self.__ax.view_init(azim = 45, elev = 20)
 
-        # Show legend for orbits of given craft
-        self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
+        # Show legend for orbits of given craft if user wants to show legend
+        if legend:
+            self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
+
+        # Graph info text
+        #self.__ax.text2D(-.1, .5, f"{self.__info_text}", transform = self.__ax.transAxes, color = "white")
 
     '''
     Function to show the matplotlib window
@@ -200,105 +273,3 @@ class Pyrigee:
     def visualize(self):
         plt.tight_layout()
         plt.show()
-
-'''
-def plot(body, orbit, craft):
-
-    # Standard matplotlib initialization items
-    fig = plt.figure()
-    __ax = fig.add_subplot(111, projection = "3d")
-    
-    # Set background colors to black
-    fig.patch.set_facecolor("k")
-    __ax.set_facecolor("k")
-
-    # Change __axis colors to white
-    __ax.x__axis.label.set_color("white")
-    __ax.y__axis.label.set_color("white")
-    __ax.z__axis.label.set_color("white")
-    __ax.tick_params(__axis = "x", colors = "white")
-    __ax.tick_params(__axis = "y", colors = "white")
-    __ax.tick_params(__axis = "z", colors = "white")
-    
-    # Change grid fill to black and grid lines to white
-    __ax.w_x__axis.set_pane_color((0, 0, 0, 0))
-    __ax.w_y__axis.set_pane_color((0, 0, 0, 0))
-    __ax.w_z__axis.set_pane_color((0, 0, 0, 0))
-    __ax.grid(color = "red")
-
-    # Plot the given body
-    __plot_body(body, __ax)
-
-    # Calculate major __axis based on given apogee/perigee and the radius of the body
-    major___axis = orbit.apogee + orbit.perigee + body.radius
-    
-    # Calculate semi-major __axis based on calculated major __axis
-    semi_major___axis = major___axis / 2
-
-    # Calculate distance between side and a focus (focus is at center of body, hence radius / 2 is added)
-    side_to_focus_distance = orbit.perigee + (body.radius / 2)
-
-    # Calculate distance between the center and a focus
-    center_to_focus_distance = abs(semi_major___axis - side_to_focus_distance)
-
-    # Calculate the orbit's eccentricity. Used to graph a circle, ellipse, hyperbola, or parabola
-    eccentricity = center_to_focus_distance / side_to_focus_distance
-
-    # Part of the equation to find minor __axis. Equal to -F^2, the distance from center to focus squared * -1
-    big_f = -(center_to_focus_distance**2)
-
-    # If big F becomes 0 or -0, set it to 0 to avoid domain error in square root if it is -0
-    if abs(big_f) == 0:
-        big_f
-
-    # Calculate minor __axis from semi-major __axis and distance from foci to center
-    minor___axis = (2 * math.sqrt(big_f + (semi_major___axis**2)))
-
-    # Calculate semi-minor __axis from minor __axis
-    semi_minor___axis = minor___axis / 2
-
-    # Scale the major and minor __axes to fit with the scale of the graph
-    major___axis /= __TICK_VALUE
-    minor___axis /= __TICK_VALUE
-
-    print(eccentricity)
-    print(math.sqrt(1 - ((semi_major___axis**2) / (semi_minor___axis**2))))
-
-    # Calculate x and y points of the orbit ellipse
-    x = (semi_major___axis / __TICK_VALUE) * np.cos(np.linspace(0, 2 * np.pi))
-    y = (semi_minor___axis / __TICK_VALUE) * np.sin(np.linspace(0, 2 * np.pi))
-    #z = x * np.tan(np.radians(orbit.inclination))
-
-    #print(z)
-
-    orbit_offset = 0
-
-    # If elliptical orbit, move orbit so body is in focus of orbit
-    if orbit.apogee != orbit.perigee:
-        orbit_offset = (semi_major___axis + body.radius) / __TICK_VALUE
-
-    # Plot orbit based on calculated coordinates and given craft color. Offset orbit to put body at focus
-    orbit_plot = __ax.plot(x + orbit_offset, y, zs = 0, zdir = "z", color = craft.color)
-
-    # Plot point and text at apogee
-    __ax.scatter((orbit.apogee + body.radius) / __TICK_VALUE, 0, 0, color = craft.color)
-    __ax.text((orbit.apogee + body.radius) / __TICK_VALUE, 0, 0, "Apogee", color = "white")
-
-    # Plot point and text at perigee
-    __ax.scatter((-orbit.perigee - body.radius) / __TICK_VALUE, 0, 0, color = craft.color)
-    __ax.text((-orbit.perigee - body.radius) / __TICK_VALUE, 0, 0, "Perigee", color = "white")
-
-    # Plot spacecraft at apogee
-    craft_point = __ax.scatter((orbit.apogee + body.radius) / __TICK_VALUE, 0, 0, color = craft.color)
-    craft_text = __ax.text((orbit.apogee + body.radius) / __TICK_VALUE, 0, 0, craft.name, color = "white")
-
-    # Animate spacecraft. Must be assigned to a variable to work
-    #a = animation.FuncAnimation(fig, __animate_craft, frames = x.size, fargs = (x + orbit_offset, y, x, craft_point, craft_text), blit = False, interval = __ANIMATION_INTERVAL, repeat = True)
-
-    __ax.view_init(azim = 0, elev = 90)
-
-    # Show the matplotlib window
-    plt.show()
-    '''
-
-
