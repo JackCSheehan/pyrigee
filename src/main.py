@@ -12,12 +12,12 @@ body = EARTH
 
 craft = ISS
 
-orbit1 = Orbit(100, 100, 0)
+orbit1 = Orbit(1, 1, 25)
 orbit2 = Orbit(10000, 10000, 0)
 
 man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT)
 
-print(body.get_std_gravitational_parameter())
+#print(body.get_std_gravitational_parameter())
 #print(body.get_gravitational_acceleration(1))
 #print(man.get_delta_v(body, orbit1))
 #print(f"r of init orbit : {body.radius + orbit1.perigee}")
@@ -26,7 +26,8 @@ print(body.get_std_gravitational_parameter())
 
 p = Pyrigee()
 
-print(f"delta-v: {man.get_delta_v(body, orbit1)} km/s")
+#print(f"delta-v: {man.get_delta_v(body, orbit1)} km/s")
+#print(f"mu: {body.get_std_gravitational_parameter()}")
 
 p.plot(body, orbit1, craft, man)
 
