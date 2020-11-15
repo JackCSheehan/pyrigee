@@ -175,7 +175,7 @@ class Pyrigee:
 
         # Calculate semi-major __axis from major __axi
         semi_major_axis = major_axis / 2
-        print(semi_major_axis)
+        print(f"Semi major axis: {semi_major_axis}")
 
         # Calculate eccentricity of orbit
         eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
