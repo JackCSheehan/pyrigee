@@ -35,89 +35,32 @@ class Maneuver:
         print("perform")
 
     '''
-    Private helper function that calculates the delta-v needed to perform a Hohmann Transfer
-    Orbit. Takes a Body object that represents object being orbited and an Orbit object 
-    representing the initial orbit. Returns the total delta-v needed to perform maneuver
+    Private helper function that calculates the delta-v needed to perform a a transfer between
+    two difference orbital velocities and an inclination change
     '''
-    def __calculate_hohmann_delta_v(self, body, initial_orbit):
+    def __calculate_delta_v(self, body, initial_orbit):
         # Get the standard gravitational parameter of the body
         std_gravitational_parameter = body.get_std_gravitational_parameter()
 
-        # r1 and r2 are the distances of initial and final orbits from origin
-        r1 = initial_orbit.perigee + body.radius
-        r2 = self.target_orbit.perigee + body.radius
+        # Calculate semi-major axis of initial orbit -- (initial apoapsis + initial periapsis) / 2
+        initial_semi_major_axis = ((initial_orbit.apogee + body.radius) + (initial_orbit.perigee + body.radius)) / 2
 
-        # Delta-v required to enter the Hohmann Transfer Orbit
-        delta_v1 = math.sqrt(std_gravitational_parameter / r1) * (math.sqrt(2 * r2 / (r1 + r2)) - 1)
+        # Calculate semi-major axis of final orbit
+        final_semi_major_axis = ((self.target_orbit.apogee + body.radius) + (self.target_orbit.perigee + body.radius)) / 2
 
-        # Delta-v required to exit the Hohmann Transfer Orbit
-        delta_v2 = math.sqrt(std_gravitational_parameter / r2) * (1 - math.sqrt(2 * r1 / (r1 + r2)))
+        # Calculate orbital velocity of initial orbit
+        initial_velocity = body.get_orbital_velocity(body.radius + initial_orbit.perigee, initial_semi_major_axis)
 
-        # Return total delta-v needed to perform the entire Hohmann Transfer
-        return delta_v1 + delta_v2
+        # Calculate orbit velocity of final orbit
+        final_velocity = body.get_orbital_velocity(body.radius + self.target_orbit.perigee, final_semi_major_axis)
 
-    '''
-    Private helper function that calculates the delta-v needed to perform a pure inclination change.
-    A pure inclination change is performed by itself without any other manuevers. Function takes
-    a Body object that represents object being orbited and an Orbit object representing the initial 
-    orbit
-    '''
-    def __calculate_inclination_change_delta_v(self, body, initial_orbit):
-        # Calculate change in inclination (delta-i)
-        delta_i = self.target_orbit.inclination - initial_orbit.inclination
+        # Calculate change in inclination between initial and final orbit
+        inclination_change = self.target_orbit.inclination - initial_orbit.inclination
 
-        # Calculate the actual the apoapsis/periapsis (distances from center of mass) of orbit
-        apoapsis = initial_orbit.apogee + body.radius
-        periapsis = initial_orbit.perigee + body.radius
+        # Calculate delta-v of manuever from manuever formula with inclination change
+        delta_v = math.sqrt(initial_velocity**2 + final_velocity**2 - 2 * initial_velocity * final_velocity * np.cos(inclination_change))
 
-        # Calculate eccentricity of orbit
-        eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
-
-        # WIP
-    
-    '''
-    Private helper function that calculates the delta-v needed to perform a Bi-Elliptic Transfer.
-    Takes a Body object that represents object being orbited and an Orbit object representing the 
-    initial orbit
-    '''
-    def __calculate_bielliptic_delta_v(self, body, initial_orbit):
-        # Get the standard gravitational parameter of the body
-        std_gravitational_parameter = body.get_std_gravitational_parameter()
-
-        # Get the radius of the initial orbit
-        r1 = initial_orbit.perigee + body.radius
-
-        # Get the radius of the target orbit
-        r2 = self.target_orbit.perigee + body.radius
-
-        # Apogee of transfer ellipses (arbitrarily chosen to be twice the apogee of target orbit)
-        rb = self.target_orbit.apogee * 2
-
-        # Semi-major axis of first transfer orbit
-        a1 = (r1 + rb) / 2
-
-        # Semi-major axis of second transfer orbit
-        a2 = (r2 + rb) / 2
-
-        # Delta-v needed to enter first half-elliptical transfer orbit
-        delta_v1 = math.sqrt((2 * std_gravitational_parameter) / r1 - (std_gravitational_parameter / a1)) - math.sqrt(std_gravitational_parameter / r1)
-
-        # Delta-v needed to enter second elliptical transfer orbit
-        delta_v2 = math.sqrt((2 * std_gravitational_parameter) / rb - (std_gravitational_parameter / a2)) - math.sqrt((2 * std_gravitational_parameter) / rb - (std_gravitational_parameter / a1))
-
-        # Delta-v needed to circularize the final orbit
-        delta_v3 = math.sqrt((2 * std_gravitational_parameter) / r2 - (std_gravitational_parameter / a2)) - math.sqrt(std_gravitational_parameter / r2)
-
-        # Return total delta-v needed to do this maneuver 
-        return delta_v1 + delta_v2 + delta_v3
-
-    '''
-    Private helper function that calculates the delta-v needed to perform a geostationary transfer
-    maneuver. Takes a Body object that represents object being orbited and an Orbit object 
-    representing the initial orbit
-    '''
-    def __calculate_geostationary_transfer_delta_v(self, body, initial_orbit):
-        print("")
+        return delta_v
 
     '''
     Calculates the total delta-v needed to do this maneuver. Takes a Body object that represents object
@@ -130,7 +73,7 @@ class Maneuver:
         gravitation_acceleration = body.get_gravitational_acceleration(initial_orbit.perigee) 
         
         # Initialize variable to hold total delta-v
-        total_delta_v = 0
+        delta_v = 0
 
         # Initialize variable to hold the standard gravitational parameter
         std_gravitational_parameter = 0
@@ -142,7 +85,7 @@ class Maneuver:
             if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
                 
                 # Calculate total delta-v to perform this maneuver
-                total_delta_v = self.__calculate_hohmann_delta_v(body, initial_orbit)
+                delta_v = self.__calculate_delta_v(body, initial_orbit)
 
             # If the apogees and perigees are invalid for Hohmann Transfers, throw exception
             else:
