@@ -127,6 +127,8 @@ class Pyrigee:
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
+        z_multiplier = 1
+
         # If user only wants to plot half the orbit, change pi multiplier to -1, so that np.linspace goes from 0 to pi
         if plot_half:
             pi_multiplier = -1
@@ -264,8 +266,7 @@ class Pyrigee:
         if legend:
             self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
 
-        # Graph info text
-        #self.__ax.text2D(-.1, .5, f"{self.__info_text}", transform = self.__ax.transAxes, color = "white")
+        self.__ax.set_title(f"Orbit around {body.name}", color = "white")
 
     '''
     Function to show the matplotlib window
