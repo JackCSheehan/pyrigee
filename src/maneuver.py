@@ -29,42 +29,33 @@ class Maneuver:
         self.type = ty
 
     '''
-    Private helper function that calculates the delta-v needed to perform a a transfer between
-    two difference orbital velocities and an inclination change
+    Private helper funcion to calculate delta-v of Hohmann Transfer Orbit
     '''
-    def __calculate_delta_v(self, body, initial_orbit):
-        # Get the standard gravitational parameter of the body
+    def __calculate_hohmann_transfer_delta_v(self, body, initial_orbit):
+        r1 = initial_orbit.perigee + body.radius
+        r2 = self.target_orbit.perigee + body.radius
+
+        delta_v1 = math.sqrt(body.get_std_gravitational_parameter() / r1) * (math.sqrt((2 * r2) / (r1 + r2)) - 1)
+        delta_v2 = math.sqrt(body.get_std_gravitational_parameter() / r2) * (1 - (math.sqrt((2 * r1) / (r1 + r2))))
+
+        return delta_v1 + delta_v2
+
+    '''
+    Private helper function that calculates the delta-v needed to do an inclination change. Takes the body being
+    orbited and the inclination change between the initial and target orbit. Calculates inclination change at apogee
+    of target orbit for efficiency purposes
+    '''
+    def __calculate_inclination_change_delta_v(self, body, inclination_change):
+        # Get the standard gravitational parameter of the body being orbited
         std_gravitational_parameter = body.get_std_gravitational_parameter()
 
-        # Calculate change in inclination between initial and final orbit
-        inclination_change = self.target_orbit.inclination - initial_orbit.inclination
+        # Calculate orbital velocity of target orbit
+        velocity = math.sqrt(std_gravitational_parameter / (self.target_orbit.apogee + body.radius))
 
-        # Calculate semi-major axis of initial orbit -- (initial apoapsis + initial periapsis) / 2
-        initial_semi_major_axis = ((initial_orbit.apogee + body.radius) + (initial_orbit.perigee + body.radius)) / 2
-
-        # Calculate orbital velocity of initial orbit
-        initial_velocity = body.get_orbital_velocity(initial_orbit.perigee, initial_semi_major_axis)
-
-        # Calculate semi-major axis of transfer orbit
-        transfer_semi_major_axis = ((self.target_orbit.apogee + body.radius) + (initial_orbit.perigee + body.radius)) / 2
-
-        # Calculate velocity of transfer orbit at transfer orbit perigee
-        transfer_velocity = body.get_orbital_velocity(initial_orbit.perigee, transfer_semi_major_axis)
-
-        delta_v1 = math.sqrt((initial_velocity**2) + (transfer_velocity**2) - 2 * initial_velocity * transfer_velocity * np.cos(np.radians(inclination_change)))
-
-        # Calculate semi-major axis of final orbit
-        final_semi_major_axis = ((self.target_orbit.apogee + body.radius) + (self.target_orbit.perigee + body.radius)) / 2
-
-        # Calculate orbit velocity of final orbit
-        final_velocity = body.get_orbital_velocity(self.target_orbit.perigee, final_semi_major_axis)        
-
-        # Calculate delta-v of manuever from manuever formula with inclination change
-        delta_v = math.sqrt((initial_velocity**2) + (final_velocity**2) - 2 * initial_velocity * final_velocity * np.cos(np.radians(inclination_change)))
+        # Calculate delta-v needed to do inclination change
+        delta_v = 2 * velocity * np.sin(np.radians(inclination_change / 2))
 
         return delta_v
-
-
 
 
     '''
@@ -80,14 +71,23 @@ class Maneuver:
         # If the orbit is a Hohmann Transfer Orbit
         if self.type == ManeuverType.HOHMANN_TRANSFER_ORBIT:
 
-            # Check that initial and target orbit
+            # Check that initial and target orbit are both circular
             if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
                 
                 # Calculate total delta-v to perform this maneuver
-                delta_v = self.__calculate_delta_v(body, initial_orbit)
+                delta_v = self.__calculate_hohmann_transfer_delta_v(body, initial_orbit)
 
             # If the apogees and perigees are invalid for Hohmann Transfers, throw exception
             else:
                 raise ValueError("Both initial and target orbits must be circular when performing a Hohmann Transfer Orbit")
+
+        # If an inclination change is needed, calculate inclination change delta-v at target orbit apogee
+        if initial_orbit.inclination != self.target_orbit.inclination:
+            
+            # Calculate inclination change
+            inclination_change = self.target_orbit.inclination - initial_orbit.inclination
+
+            # Add delta-v of inclination change to total delta-v
+            delta_v += abs(self.__calculate_inclination_change_delta_v(body, inclination_change))
 
         return delta_v
