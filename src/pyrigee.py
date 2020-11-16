@@ -205,7 +205,7 @@ class Pyrigee:
         # Calculate eccentricity of transfer orbit
         transfer_eccentricity = (transfer_apoapsis - transfer_periapsis) / (transfer_apoapsis + transfer_periapsis)
 
-        transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, target_orbit.inclination)
+        transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, initial_orbit.inclination)
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
         self.__plot_elliptical_orbit(body, transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False)
