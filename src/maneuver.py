@@ -20,13 +20,14 @@ Class that allows users to define maneuvers to a target orbit
 class Maneuver:
     '''
     Takes the name of the new orbit (for legend purposes), an Orbit object
-    describing the new orbit, and a ManeuverType enum of the type of 
-    Maneuver to execute
+    describing the new orbit, a ManeuverType enum of the type of 
+    Maneuver to execute, and a color to change appearance of maneuver in plot
     '''
-    def __init__(self, n, to, ty):
+    def __init__(self, n, to, ty, c):
         self.name = n
         self.target_orbit = to
         self.type = ty
+        self.color = c
 
     '''
     Private helper funcion to calculate delta-v of Hohmann Transfer Orbit

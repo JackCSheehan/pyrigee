@@ -7,6 +7,7 @@ import matplotlib.animation as animation
 import numpy as np
 import math
 from orbit import *
+from craft import *
 from maneuver import ManeuverType
 
 '''
@@ -118,18 +119,17 @@ class Pyrigee:
     '''
     Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
     Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
-    length. The next parameter indicates if only half the orbit should be plotted. plot_labels 
+    length. The next parameter indicates if this is a transfer orbit of not. If this is true, only
+    half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted
     '''
-    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis, plot_half = False, plot_labels = True, legend = True):
+    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
-        z_multiplier = 1
-
         # If user only wants to plot half the orbit, change pi multiplier to -1, so that np.linspace goes from 0 to pi
-        if plot_half:
+        if transfer:
             pi_multiplier = -1
 
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
@@ -146,6 +146,10 @@ class Pyrigee:
         # If no legend should be shown, set label to blank
         if not legend:
             craft_label = ""
+
+        # If this is a transfer, change label to reflect 
+        if transfer:
+            craft_label = f"{craft.name} transfer"
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
         self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft_label)
@@ -277,13 +281,16 @@ class Pyrigee:
     body being orbited, the initial orbit, the orbiting craft making the transfer, and the manuever
     '''
     def __plot_maneuver(self, body, initial_orbit, craft, maneuver):
+        # Create custom craft for manuevering to ensure correct appearance of transfer in plot
+        maneuver_craft = Craft(craft.name, craft.mass, maneuver.color)
+
         # Plot orbit based on given type
         if maneuver.type == ManeuverType.HOHMANN_TRANSFER_ORBIT:
-            self.__plot_hohmann_transfer_orbit(body, initial_orbit, craft, maneuver)
+            self.__plot_hohmann_transfer_orbit(body, initial_orbit, maneuver_craft, maneuver)
 
         # If there is an inclination difference, plot the inclination change arrow indicator
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
-            self.__plot_inclination_change_arrow(body, craft, initial_orbit, maneuver.target_orbit)
+            self.__plot_inclination_change_arrow(body, maneuver_craft, initial_orbit, maneuver.target_orbit)
 
     '''
     Function to plot crafts and orbits. Takes a single body object that the crafts will orbit and
