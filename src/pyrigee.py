@@ -107,19 +107,6 @@ class Pyrigee:
         self.__ax.plot_wireframe(x, y, z, color = body.color)
 
     '''
-    Private helper function to animate craft orbit around body. Takes the frame given by
-    the the matplotlib timer; the x, y, and y coords of an orbit, and the plot of a craft
-    '''
-    def __animate_craft(frame, x, y, z, craft_point, craft_text):
-        # Set offsets of point
-        craft_point.set_offsets(np.append(x[frame], y[frame]))
-        craft_point.set_3d_properties(z[frame], "z")
-
-        # Set offsets of text to follow point
-        craft_text.set_position(np.append(x[frame], y[frame]))
-        craft_text.set_3d_properties(z[frame], None)
-
-    '''
     Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
     Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
     length. The next parameter indicates if this is a transfer orbit of not. If this is true, only
@@ -255,12 +242,12 @@ class Pyrigee:
         target_eccentricity = (scaled_target_apoapsis - scaled_target_periapsis) / (scaled_target_apoapsis + scaled_target_periapsis)
 
         # Calculate radius of placement of inclination arrow by using polar equation of ellipse
-        r = (scaled_target_semi_major_axis * (1 - target_eccentricity**2)) / (1 - target_eccentricity * np.cos(.5 * np.pi))
+        r = (scaled_target_semi_major_axis * (1 - target_eccentricity**2)) / (1 - target_eccentricity * np.cos(2 * np.pi))
 
         # Calculate coordinates of inclination arrow
-        x = r * np.cos(.5 * np.pi) * np.cos(np.radians(target_orbit.inclination))
-        y = r * np.sin(.5 * np.pi)
-        z = r * np.sin(np.radians(target_orbit.inclination)) * np.cos(.5 * np.pi)
+        x = r * np.cos(2 * np.pi) * np.cos(np.radians(target_orbit.inclination))
+        y = r * np.sin(2 * np.pi)
+        z = r * np.sin(np.radians(target_orbit.inclination)) * np.cos(2 * np.pi)
 
         # Calculate inclination change
         inclination_change = target_orbit.inclination - initial_orbit.inclination
