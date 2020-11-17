@@ -18,7 +18,7 @@ class Pyrigee:
     __PLANET_DIVS = 9j
 
     # The number of divisions in orbit plots
-    __ORBIT_DIVS = 51
+    __ORBIT_DIVS = 61
 
     # The number of km that each tick represents
     __TICK_VALUE = 1000
@@ -136,7 +136,7 @@ class Pyrigee:
             pi_multiplier = -1
 
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-        r = (-semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
+        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
         x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
