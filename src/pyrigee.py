@@ -136,12 +136,12 @@ class Pyrigee:
             pi_multiplier = -1
 
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
+        r = (-semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = -r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
-        y = -r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
-        z = -r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+        x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
 
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
