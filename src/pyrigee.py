@@ -139,9 +139,9 @@ class Pyrigee:
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
-        y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
-        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+        x = -r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        y = -r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+        z = -r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
 
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
@@ -177,13 +177,10 @@ class Pyrigee:
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
         r = ((orbit.perigee) * 2 + (body.radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
 
-        # Convert polar equations to cartesean coords
-        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        # Convert polar equations to cartesean coords based on the given orbital inclination
+        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
         y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
-        z = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
-
-        # Rotate coords based on given inclination
-        # =
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
         self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)

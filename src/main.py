@@ -8,12 +8,12 @@ from craft import *
 from orbit import *
 from maneuver import *
 
-body = Body("Earth", 5.9722e24, 6378, "cornflowerblue")
+body = EARTH
 
 craft = ISS
 
-orbit1 = Orbit(100, 100, 25)
-orbit2 = Orbit(10000, 10000, 0)
+orbit1 = Orbit(100, 10000, 25)
+orbit2 = Orbit(100000000000, 100000000000, 0)
 
 man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT, "lightseagreen")
 
