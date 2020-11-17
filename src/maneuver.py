@@ -32,9 +32,11 @@ class Maneuver:
     Private helper funcion to calculate delta-v of Hohmann Transfer Orbit
     '''
     def __calculate_hohmann_transfer_delta_v(self, body, initial_orbit):
+        # Calculate orbital radii needed in delt-v equation
         r1 = initial_orbit.perigee + body.radius
         r2 = self.target_orbit.perigee + body.radius
 
+        # Calculate delta-v needed for both phases of transfer
         delta_v1 = math.sqrt(body.get_std_gravitational_parameter() / r1) * (math.sqrt((2 * r2) / (r1 + r2)) - 1)
         delta_v2 = math.sqrt(body.get_std_gravitational_parameter() / r2) * (1 - (math.sqrt((2 * r1) / (r1 + r2))))
 

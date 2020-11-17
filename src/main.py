@@ -12,7 +12,7 @@ body = EARTH
 
 craft = ISS
 
-orbit1 = Orbit(1, 1, 25)
+orbit1 = Orbit(1, 1, 15)
 orbit2 = Orbit(10000, 10000, 0)
 
 man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT)
