@@ -4,7 +4,6 @@ orbits and do other calculations
 '''
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.patches import Rectangle
 import numpy as np
 import math
 from orbit import *
@@ -141,14 +140,15 @@ class Pyrigee:
         y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
         z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
 
-        craft_name = craft.name
+        # Default label for craft. Needed in case user set legends to false
+        craft_label = craft.name
 
-        # If no legend should be shown, set craft_name to blank
+        # If no legend should be shown, set label to blank
         if not legend:
-            craft_name = ""
+            craft_label = ""
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
-        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft_name)
+        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft_label)
 
         # If plot_labels is true, plot points and labels at orbit's apogee and perigee
         if plot_labels:
@@ -187,7 +187,8 @@ class Pyrigee:
 
     '''
     Private method that plots a hohmann transfer orbit. Takes the body being orbited, the initial orbit,
-    the craft orbiting, and the target orbit
+    the craft orbiting, and the target orbit. Also changes the info text to indicate the delta-v of
+    the maneuver
     '''
     def __plot_hohmann_transfer_orbit(self, body, initial_orbit, craft, maneuver):
         # Get target orbit from manuever
@@ -210,8 +211,66 @@ class Pyrigee:
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
         self.__plot_elliptical_orbit(body, transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False)
 
-        # Append info about maneuver to info text
-        self.__info_text += f"{craft.name} Hohmann Transfer:\nΔV Needed: {maneuver.get_delta_v(body, initial_orbit) * 1000:.2f} m/s"
+        # Message to show above delta-v readout
+        maneuver_message = ""
+
+        # Determine which message to show depending on whether or not an inclination change was included
+        if initial_orbit.inclination != maneuver.target_orbit.inclination:
+            maneuver_message = "Hohmann Transfer (with inclination change)"
+        else:
+            maneuver_message = "Hohman Transfer"
+        
+        # Add info text about delta-v needed for this maneuver
+        self.__info_text += f"{craft.name} {maneuver_message}:\nΔV Needed: {maneuver.get_delta_v(body, initial_orbit) * 1000:.2f} m/s\n"
+
+    '''
+    Private method that simply plots the arrow indicating an inclination change. Does not change the info
+    text or deal directly with the maneuver. Takes the body being orbited, the orbiting craft, and the 
+    initial and target orbits
+    '''
+    def __plot_inclination_change_arrow(self, body, craft, initial_orbit, target_orbit):
+        # Scale orbit distances and body radius to ensure that the inclination arrow is plotted to scale
+        scaled_body_radius = body.radius / self.__TICK_VALUE
+        scaled_target_apogee = target_orbit.apogee / self.__TICK_VALUE
+        scaled_target_perigee = target_orbit.perigee / self.__TICK_VALUE
+
+        # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit
+        scaled_target_apoapsis = scaled_target_apogee + scaled_body_radius
+        scaled_target_periapsis = scaled_target_perigee + scaled_body_radius
+
+        # Calculate major axis of the target orbit
+        scaled_target_major_axis = scaled_target_apoapsis + scaled_target_periapsis
+
+        # Calculate semi-major axis of target orbit
+        scaled_target_semi_major_axis = scaled_target_major_axis / 2
+
+        # Calculate eccentricity of target orbit
+        target_eccentricity = (scaled_target_apoapsis - scaled_target_periapsis) / (scaled_target_apoapsis + scaled_target_periapsis)
+
+        # Calculate radius of placement of inclination arrow by using polar equation of ellipse
+        r = (scaled_target_semi_major_axis * (1 - target_eccentricity**2)) / (1 - target_eccentricity * np.cos(.5 * np.pi))
+
+        # Calculate coordinates of inclination arrow
+        x = r * np.cos(.5 * np.pi) * np.cos(np.radians(target_orbit.inclination))
+        y = r * np.sin(.5 * np.pi)
+        z = r * np.sin(np.radians(target_orbit.inclination)) * np.cos(.5 * np.pi)
+
+        # Calculate inclination change
+        inclination_change = target_orbit.inclination - initial_orbit.inclination
+
+        marker = ""
+
+        # set marker type depending on direction of inclination change
+        if inclination_change < 0:
+            marker = "$\\downarrow$"
+        else:
+            marker = "$\\uparrow$"
+
+        # Plot an arrow indicating direction of inclination change
+        self.__ax.plot(x, y, z, marker = marker, markersize = 15, color = craft.color)
+
+        # Plot text next to inclination arrow
+        self.__ax.text(x, y + .5, z, f"Δi = {abs(inclination_change)}°", color = "white")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes the
@@ -222,12 +281,16 @@ class Pyrigee:
         if maneuver.type == ManeuverType.HOHMANN_TRANSFER_ORBIT:
             self.__plot_hohmann_transfer_orbit(body, initial_orbit, craft, maneuver)
 
+        # If there is an inclination difference, plot the inclination change arrow indicator
+        if initial_orbit.inclination != maneuver.target_orbit.inclination:
+            self.__plot_inclination_change_arrow(body, craft, initial_orbit, maneuver.target_orbit)
+
     '''
     Function to plot crafts and orbits. Takes a single body object that the crafts will orbit and
     a dictionary of Orbit object and Craft objects paired together. This function will graph each
     corresponding to each craft. legend indicates whether or not the legend should be plotted
     '''
-    def plot(self, body, orbit, craft, maneuver = None, legend = True):
+    def plot(self, body, orbit, craft, maneuver = None, plot_labels = True, legend = True):
         # Plot the given body
         self.__plot_body(body)
 
@@ -250,14 +313,14 @@ class Pyrigee:
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            self.__plot_elliptical_orbit(body, orbit, craft, eccentricity, semi_major_axis, False, True, legend)
+            self.__plot_elliptical_orbit(body, orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend)
 
         # If user included a manuever, plot the manuever
         if maneuver != None:
             self.__plot_maneuver(body, orbit, craft, maneuver)
 
             # After plotting manuever, plot orbit transferred in
-            self.plot(body, maneuver.target_orbit, craft, None, False)
+            self.plot(body, maneuver.target_orbit, craft, None, False, False)
 
         # Set default view to see planet from convenient angle
         self.__ax.view_init(azim = 45, elev = 20)
