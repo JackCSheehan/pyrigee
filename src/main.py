@@ -8,11 +8,11 @@ from craft import *
 from orbit import *
 from maneuver import *
 
-body = EARTH
+body = Body("Earth", 5.9722e24, 6378, "cornflowerblue")
 
 craft = ISS
 
-orbit1 = Orbit(1, 1, 15)
+orbit1 = Orbit(100, 100, 25)
 orbit2 = Orbit(10000, 10000, 0)
 
 man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT, "lightseagreen")
@@ -29,7 +29,7 @@ p = Pyrigee()
 #print(f"delta-v: {man.get_delta_v(body, orbit1)} km/s")
 #print(f"mu: {body.get_std_gravitational_parameter()}")
 
-p.plot(body, orbit1, craft, man)
+p.plot(body, orbit1, craft)
 
 p.visualize()
 
