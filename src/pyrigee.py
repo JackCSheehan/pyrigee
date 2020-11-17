@@ -81,24 +81,27 @@ class Pyrigee:
         # Create theta and phi values that run from 0 to 2pi and 0 to pi, respectively
         theta, phi = np.mgrid[0:2 * np.pi:self.__PLANET_DIVS, 0:np.pi:self.__PLANET_DIVS]
 
+        # Scale radius of body to fir in units of plot
+        scaled_radius = body.radius / self.__TICK_VALUE
+
         '''
         Calculate x, y, and z of sphere given theta and phi ranges. Divide each radius by tick value to make sure
         that the units are correct when displayed
         '''
-        x = (body.radius / self.__TICK_VALUE) * np.cos(theta) * np.sin(phi)
-        y = (body.radius / self.__TICK_VALUE) * np.sin(theta) * np.sin(phi)
-        z = (body.radius / self.__TICK_VALUE) * np.cos(phi)
+        x = scaled_radius * np.cos(theta) * np.sin(phi) 
+        y = scaled_radius * np.sin(theta) * np.sin(phi)
+        z = scaled_radius * np.cos(phi)
 
         # Calculate graph offset to show body proportionally
-        graph_offset = body.radius / self.__LIMIT_OFFSET_DIVISOR
+        graph_offset = (body.radius / self.__LIMIT_OFFSET_DIVISOR)
 
         '''
         Set limits relative to radius of body, with offsets as needed to keep graph looking proportional.
         Each body radius is reduced to the correct unit by dividing it by a tick value
         '''
-        self.__ax.set_xlim(-(body.radius / self.__TICK_VALUE) - graph_offset, (body.radius / self.__TICK_VALUE) + graph_offset)
-        self.__ax.set_ylim(-(body.radius / self.__TICK_VALUE) - graph_offset, (body.radius / self.__TICK_VALUE) + graph_offset)
-        self.__ax.set_zlim(-(body.radius / self.__TICK_VALUE), (body.radius / self.__TICK_VALUE))
+        self.__ax.set_xlim(-scaled_radius - graph_offset, scaled_radius + graph_offset)
+        self.__ax.set_ylim(-scaled_radius - graph_offset, scaled_radius + graph_offset)
+        self.__ax.set_zlim(-scaled_radius, scaled_radius)
 
         # Plot the body on 3D __axis
         self.__ax.plot_wireframe(x, y, z, color = body.color)
@@ -174,10 +177,13 @@ class Pyrigee:
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
         r = ((orbit.perigee) * 2 + (body.radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
 
-        # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        # Convert polar equations to cartesean coords
+        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
         y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
-        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        z = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+
+        # Rotate coords based on given inclination
+        # =
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
         self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
