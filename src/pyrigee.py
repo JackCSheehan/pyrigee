@@ -26,6 +26,16 @@ class Pyrigee:
     # The difference between 1 and the eccentricity when orbit is considered parabolic
     __EPSILON_E = .1
 
+    # Labels for orbit apogee and perigee
+    __APOGEE_LABEL = "Apogee"
+    __PERIGEE_LABEL = "Perigee"
+
+    # Offset of apogee/perigee labels
+    __APSIS_LABEL_OFFSET = .7
+
+    # Offset of inclination label
+    __INCLINATION_LABEL_OFFSET = 1.5
+
     ''' 
     Offset for graph x/y limits to ensure graph looks proportional. Divide body by 4252 to get the offset 
     to show body proportionally by matplotlib
@@ -47,6 +57,9 @@ class Pyrigee:
         self.__fig = plt.figure()
         self.__ax = self.__fig.add_subplot(111, projection = "3d", proj_type = "ortho")
         self.__ax.format_coord = self.__format_coord
+
+        # Set default view to see planet from convenient angle
+        self.__ax.view_init(azim = 45, elev = 20)
         
         # Set background colors to black
         self.__fig.patch.set_facecolor("k")
@@ -148,14 +161,14 @@ class Pyrigee:
         if plot_labels:
             # Plot point and text at apogee
             self.__ax.scatter(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, color = craft.color)
-            self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, "Apogee", color = "white")
+            self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, z[0] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, self.__APOGEE_LABEL, color = "white")
 
             # Index of orbit coordinates of the orbit's perigee
             perigee_coord_index = int(x.size / 2)
 
             # Plot point and text at perigee
             self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
-            self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
+            self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, z[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
 
     '''
     Private helper function that plots parabolic orbits when the eccentricity is very close to 1
@@ -177,7 +190,7 @@ class Pyrigee:
 
         # Plot point and text at perigee
         self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
-        self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, "Perigee", color = "white")
+        self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, z[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
 
     '''
     Private method that plots a hohmann transfer orbit. Takes the body being orbited, the initial orbit,
@@ -264,7 +277,7 @@ class Pyrigee:
         self.__ax.plot(x, y, z, marker = marker, markersize = 15, color = craft.color)
 
         # Plot text next to inclination arrow
-        self.__ax.text(x, y + .5, z, f"Δi = {abs(inclination_change)}°", color = "white")
+        self.__ax.text(x, y + self.__INCLINATION_LABEL_OFFSET, z, f"Δi = {abs(inclination_change)}°", color = "white")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes the
@@ -319,13 +332,11 @@ class Pyrigee:
             # After plotting manuever, plot orbit transferred in
             self.plot(body, maneuver.target_orbit, craft, None, False, False)
 
-        # Set default view to see planet from convenient angle
-        self.__ax.view_init(azim = 45, elev = 20)
-
         # Show legend for orbits of given craft if user wants to show legend
         if legend:
             self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
 
+        # Set title to indicate the main body
         self.__ax.set_title(f"Orbit around {body.name}", color = "white")
 
     '''
