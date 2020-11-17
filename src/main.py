@@ -15,7 +15,7 @@ craft = ISS
 orbit1 = Orbit(1, 1, 15)
 orbit2 = Orbit(10000, 10000, 0)
 
-man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT)
+man = Maneuver("TLI", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT, "lightseagreen")
 
 #print(body.get_std_gravitational_parameter())
 #print(body.get_gravitational_acceleration(1))
