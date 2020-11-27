@@ -7,6 +7,10 @@ import numpy as np
 import math
 from orbit import *
 from craft import *
+import warnings
+
+# Ignore RuntimeWarning that may result when plotting parabolic orbit (since there is theoretically no end to plot)
+warnings.filterwarnings("ignore", category = RuntimeWarning)
 
 '''
 Class containing methods and constants that allows users to graph orbits
@@ -115,6 +119,15 @@ class Pyrigee:
         self.__ax.plot_wireframe(x, y, z, color = body.color)
 
     '''
+    Private helper function that takes x, y, z coordinates and returns the coordinates
+    as a tuple scaled by self.__TICK_VALUE
+    '''
+    def __get_scaled_coordinates(self, x, y, z):
+        return (x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE)
+
+    #def __plot_perigee_text(self, (x, y, z), text)
+
+    '''
     Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
     Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
     length. The next parameter indicates if this is a transfer orbit of not. If this is true, only
@@ -154,8 +167,11 @@ class Pyrigee:
         if transfer:
             craft_label = f"{craft.name} transfer"
 
+        # Scaled coordinates for plotting
+        scaled_x, scaled_y, scaled_z = self.__get_scaled_coordinates(*(x, y, z))
+
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
-        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft_label)
+        self.__ax.plot(scaled_x, scaled_y, scaled_z, zdir = "z", color = craft.color, label = craft_label)
 
         # If plot_labels is true, plot points and labels at orbit's apogee and perigee
         if plot_labels:
@@ -192,15 +208,23 @@ class Pyrigee:
         y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
         z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
 
+        # Scaled coordinates for plotting
+        scaled_x, scaled_y, scaled_z = self.__get_scaled_coordinates(*(x, y, z))
+
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
-        self.__ax.plot(x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE, zdir = "z", color = craft.color, label = craft.name)
+        self.__ax.plot(scaled_x, scaled_y, scaled_z, zdir = "z", color = craft.color, label = craft.name)
 
         # Index of orbit coordinates of the orbit's perigee
         perigee_coord_index = int(x.size / 2)
 
+        # Scale perigee coordinates for plotting
+        perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
+        perigee_y_coord = y[perigee_coord_index] / self.__TICK_VALUE
+        perigee_z_coord = z[perigee_coord_index] / self.__TICK_VALUE
+
         # Plot point and text at perigee
-        self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
-        self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, z[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
+        self.__ax.scatter(perigee_x_coord, perigee_y_coord, perigee_z_coord, color = craft.color)
+        self.__ax.text(perigee_x_coord, perigee_y_coord + self.__APSIS_LABEL_OFFSET, perigee_z_coord + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
 
     '''
     Private method that plots a hohmann transfer orbit. Takes the body being orbited, the initial orbit,
