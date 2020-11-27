@@ -50,7 +50,7 @@ class Maneuver:
         
         # If the target orbit is higher, set highest apogee to the target orbit's apogee
         else:
-            highest_apogee = target_orbit.apogee
+            highest_apogee = self.target_orbit.apogee
 
         # Calculate orbital velocity of target orbit
         velocity = math.sqrt(std_gravitational_parameter / (highest_apogee + body.radius))
