@@ -1,6 +1,5 @@
 '''
-Main file for the Pyrigee package containing functions that allow users to plot
-orbits and do other calculations
+File containing OrbitPlotter class definition
 '''
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +14,7 @@ warnings.filterwarnings("ignore", category = RuntimeWarning)
 '''
 Class containing methods and constants that allows users to graph orbits
 '''
-class Pyrigee:
+class OrbitPlotter:
     # The number of divisions in wireframe plots for bodies
     __PLANET_DIVS = 9j
 
