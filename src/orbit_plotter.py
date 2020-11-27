@@ -8,9 +8,6 @@ from orbit import *
 from craft import *
 import warnings
 
-# Ignore RuntimeWarning that may result when plotting parabolic orbit (since there is theoretically no end to plot)
-warnings.filterwarnings("ignore", category = RuntimeWarning)
-
 '''
 Class containing methods and constants that allows users to graph orbits
 '''
@@ -45,9 +42,11 @@ class OrbitPlotter:
 
     '''
     Initialization code for the matplotlib graph including creation of figure, __axes, and
-    color settings 
+    color settings. Takes a Body object that all orbits will be plotted around
     '''
-    def __init__(self):
+    def __init__(self, b):
+        self.body = b
+
         # Create string to hold text that will be shown on side of screen
         self.__info_text = ""
 
@@ -81,19 +80,21 @@ class OrbitPlotter:
         self.__ax.w_yaxis.set_pane_color((0, 0, 0, 0))
         self.__ax.w_zaxis.set_pane_color((0, 0, 0, 0))
 
+        # Plot the give body
+        self.__plot_body()
+
     def __format_coord(self, x, y):
         return self.__info_text
 
     '''
-    Private helper function to plot the body given in the plot function. Takes the body to
-    plot
+    Private helper function to plot the body given in the plot function
     '''
-    def __plot_body(self, body):
+    def __plot_body(self):
         # Create theta and phi values that run from 0 to 2pi and 0 to pi, respectively
         theta, phi = np.mgrid[0:2 * np.pi:self.__PLANET_DIVS, 0:np.pi:self.__PLANET_DIVS]
 
         # Scale radius of body to fir in units of plot
-        scaled_radius = body.radius / self.__TICK_VALUE
+        scaled_radius = self.body.radius / self.__TICK_VALUE
 
         '''
         Calculate x, y, and z of sphere given theta and phi ranges. Divide each radius by tick value to make sure
@@ -104,7 +105,7 @@ class OrbitPlotter:
         z = scaled_radius * np.cos(phi)
 
         # Calculate graph offset to show body proportionally
-        graph_offset = (body.radius / self.__LIMIT_OFFSET_DIVISOR)
+        graph_offset = (self.body.radius / self.__LIMIT_OFFSET_DIVISOR)
 
         '''
         Set limits relative to radius of body, with offsets as needed to keep graph looking proportional.
@@ -115,7 +116,7 @@ class OrbitPlotter:
         self.__ax.set_zlim(-scaled_radius, scaled_radius)
 
         # Plot the body on 3D __axis
-        self.__ax.plot_wireframe(x, y, z, color = body.color)
+        self.__ax.plot_wireframe(x, y, z, color = self.body.color)
 
     '''
     Private helper function that takes x, y, z coordinates and returns the coordinates
@@ -156,14 +157,14 @@ class OrbitPlotter:
 
     '''
     Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
-    Takes the body, orbit, and craft to plot, the scaled eccentricity, and the semi major axis
+    Takes the orbit and craft to plot, the scaled eccentricity, and the semi major axis
     length. The next parameter indicates if this is a transfer orbit of not. If this is true, only
     half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted. negative indicates whether or not the orbit should
     be graphed backwards (used in plotting certain cases of transfers)
     '''
-    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
@@ -209,11 +210,13 @@ class OrbitPlotter:
             self.__plot_perigee_text(x, y, z, craft.color)
 
     '''
-    Private helper function that plots parabolic orbits when the eccentricity is very close to 1
+    Private helper function that plots parabolic orbits when the eccentricity is very close to 1. Takes
+    the orbit and craft to plot, as well as the semi-major axis of the orbit (calculated elsewhere to
+    reduce redundant code)
     '''
-    def __plot_parabolic_orbit(self, body, orbit, craft, semi_major_axis):
+    def __plot_parabolic_orbit(self, orbit, craft, semi_major_axis):
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-        r = ((orbit.perigee) * 2 + (body.radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+        r = ((orbit.perigee) * 2 + (self.body.radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
         x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
@@ -230,19 +233,19 @@ class OrbitPlotter:
         self.__plot_perigee_text(x, y, z, craft.color)
 
     '''
-    Private method that plots a Hohmann transfer orbit. Takes the body being orbited, the initial orbit,
+    Private method that plots a Hohmann transfer orbit. Takes the initial orbit,
     the craft orbiting, and the target orbit. Also changes the info text to indicate the delta-v of
     the maneuver
     '''
-    def __plot_hohmann_transfer_orbit(self, body, initial_orbit, craft, maneuver):
+    def __plot_hohmann_transfer_orbit(self, initial_orbit, craft, maneuver):
         # Get target orbit from manuever
         target_orbit = maneuver.target_orbit
 
         # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
         transfer_apogee = target_orbit.apogee
         transfer_perigee = initial_orbit.perigee
-        transfer_apoapsis = transfer_apogee + body.radius
-        transfer_periapsis = transfer_perigee + body.radius
+        transfer_apoapsis = transfer_apogee + self.body.radius
+        transfer_periapsis = transfer_perigee + self.body.radius
 
         # Calculate semi-major axis of transfer orbit
         transfer_semi_major_axis = (transfer_apoapsis + transfer_periapsis) / 2
@@ -260,7 +263,7 @@ class OrbitPlotter:
             negative = True
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(body, transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative)
+        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative)
 
         # Message to show above delta-v readout
         maneuver_message = ""
@@ -272,14 +275,13 @@ class OrbitPlotter:
             maneuver_message = "Hohman Transfer"
         
         # Add info text about delta-v needed for this maneuver
-        self.__info_text += f"{craft.name} {maneuver_message}:\nΔV Needed: {maneuver.get_delta_v(body, initial_orbit) * 1000:.2f} m/s\n"
+        self.__info_text += f"{craft.name} {maneuver_message}:\nΔV Needed: {maneuver.get_delta_v(self.body, initial_orbit) * 1000:.2f} m/s\n"
 
     '''
     Private method that simply plots the arrow indicating an inclination change. Does not change the info
-    text or deal directly with the maneuver. Takes the body being orbited, the orbiting craft, and the 
-    initial and target orbits
+    text or deal directly with the maneuver. Takes the orbiting craft and the initial and target orbits
     '''
-    def __plot_inclination_change_arrow(self, body, craft, initial_orbit, target_orbit):
+    def __plot_inclination_change_arrow(self, craft, initial_orbit, target_orbit):
         # Variables that will store the value of the highest apogee/perigee between the initial and target orbits
         highest_apogee = 0
         highest_perigee = 0
@@ -296,7 +298,7 @@ class OrbitPlotter:
             highest_perigee = target_orbit.perigee
 
         # Scale orbit distances and body radius to ensure that the inclination arrow is plotted to scale
-        scaled_body_radius = body.radius / self.__TICK_VALUE
+        scaled_body_radius = self.body.radius / self.__TICK_VALUE
         scaled_apogee = highest_apogee / self.__TICK_VALUE
         scaled_perigee = highest_perigee / self.__TICK_VALUE
 
@@ -339,33 +341,33 @@ class OrbitPlotter:
         self.__ax.text(x, y + self.__INCLINATION_LABEL_OFFSET, z - self.__INCLINATION_LABEL_OFFSET, f"Δi = {abs(inclination_change)}°", color = "white")
 
     '''
-    Private helper function that calls the correct plotting function to plot the given manuever. Takes the
-    body being orbited, the initial orbit, the orbiting craft making the transfer, and the manuever
+    Private helper function that calls the correct plotting function to plot the given manuever. Takes 
+    the initial orbit, the orbiting craft making the transfer, and the manuever
     '''
-    def __plot_maneuver(self, body, initial_orbit, craft, maneuver):
+    def __plot_maneuver(self, initial_orbit, craft, maneuver):
         # Create custom craft for manuevering to ensure correct appearance of transfer in plot
         maneuver_craft = Craft(craft.name, craft.mass, maneuver.color)
 
         # If there is a change in the orbit radius (more extensive checking is done in manuever class)
         if maneuver.target_orbit.apogee != initial_orbit.apogee:
-            self.__plot_hohmann_transfer_orbit(body, initial_orbit, maneuver_craft, maneuver)
+            self.__plot_hohmann_transfer_orbit(initial_orbit, maneuver_craft, maneuver)
 
         # If there is an inclination difference, plot the inclination change arrow indicator
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
-            self.__plot_inclination_change_arrow(body, maneuver_craft, initial_orbit, maneuver.target_orbit)
+            self.__plot_inclination_change_arrow(maneuver_craft, initial_orbit, maneuver.target_orbit)
 
     '''
-    Function to plot crafts and orbits. Takes a single body object that the crafts will orbit and
-    a dictionary of Orbit object and Craft objects paired together. This function will graph each
-    corresponding to each craft. legend indicates whether or not the legend should be plotted
+    Function to plot crafts and orbits. Takes an orbit and craft to plot. If given a manuever, the maneuver
+    will be plotted. plot_labgels indicates whether or not apogee/perigee lables will be plotted. legend indicates
+    whether or not the legend should be plotted
     '''
-    def plot(self, body, orbit, craft, maneuver = None, plot_labels = True, legend = True):
+    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True):
         # Plot the given body
-        self.__plot_body(body)
+        self.__plot_body()
 
         # Calculate the apoapsis/periapsis (distances from center of mass) of orbit
-        apoapsis = orbit.apogee + body.radius
-        periapsis = orbit.perigee + body.radius
+        apoapsis = orbit.apogee + self.body.radius
+        periapsis = orbit.perigee + self.body.radius
 
         # Calculate major axis by adding apogee, perigee, and body diamter
         major_axis = apoapsis + periapsis
@@ -378,25 +380,25 @@ class OrbitPlotter:
 
         # If eccentricity is sufficiently close to 1, plot a parabolic orbit
         if (1 - eccentricity < self.__EPSILON_E):
-            self.__plot_parabolic_orbit(body, orbit, craft, semi_major_axis)
+            self.__plot_parabolic_orbit(orbit, craft, semi_major_axis)
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            self.__plot_elliptical_orbit(body, orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend)
+            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend)
 
         # If user included a manuever, plot the manuever
         if maneuver != None:
-            self.__plot_maneuver(body, orbit, craft, maneuver)
+            self.__plot_maneuver(orbit, craft, maneuver)
 
             # After plotting manuever, plot orbit transferred in
-            self.plot(body, maneuver.target_orbit, craft, None, False, False)
+            self.plot(maneuver.target_orbit, craft, None, False, False)
 
         # Show legend for orbits of given craft if user wants to show legend
         if legend:
             self.__ax.legend(facecolor = "k", framealpha = 0, labelcolor = "white")
 
         # Set title to indicate the main body
-        self.__ax.set_title(f"Orbit around {body.name}", color = "white")
+        self.__ax.set_title(f"Orbit around {self.body.name}", color = "white")
 
     '''
     Function to show the matplotlib window
