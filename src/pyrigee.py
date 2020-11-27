@@ -125,7 +125,35 @@ class Pyrigee:
     def __get_scaled_coordinates(self, x, y, z):
         return (x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE)
 
-    #def __plot_perigee_text(self, (x, y, z), text)
+    '''
+    Private helper function that will plot apogee text given lists of x, y, and z coords, 
+    the text to plot at the apogee, and the color of the apogee point to plot
+    '''
+    def __plot_apogee_text(self, x, y, z, color):
+        # Scale apogee coordinates for plotting
+        apogee_x_coord = x[0] / self.__TICK_VALUE
+        apogee_y_coord = y[0] / self.__TICK_VALUE
+        apogee_z_coord = z[0] / self.__TICK_VALUE
+
+        # Plot point and text at apogee
+        self.__ax.scatter(apogee_x_coord, apogee_y_coord, apogee_z_coord, color = color)
+        self.__ax.text(apogee_x_coord, apogee_y_coord + self.__APSIS_LABEL_OFFSET, apogee_z_coord + self.__APSIS_LABEL_OFFSET, self.__APOGEE_LABEL, color = "white")
+
+    '''
+    Private helper function that will plot perigee text given lists of x, y, and z coords, 
+    the text to plot at the perigee, and the color of the perigee point to plot
+    '''
+    def __plot_perigee_text(self, x, y, z, color):
+        # Index of orbit coordinates of the orbit's perigee
+        perigee_coord_index = int(x.size / 2)
+
+        # Scale perigee coordinates for plotting
+        perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
+        perigee_y_coord = y[perigee_coord_index] / self.__TICK_VALUE
+        perigee_z_coord = z[perigee_coord_index] / self.__TICK_VALUE
+
+        self.__ax.scatter(perigee_x_coord, perigee_y_coord, perigee_z_coord, color = color)
+        self.__ax.text(perigee_x_coord, perigee_y_coord + self.__APSIS_LABEL_OFFSET, perigee_z_coord + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
 
     '''
     Private helper function that plots elliptical orbits when eccentricity is between 0 and 1.
@@ -175,26 +203,11 @@ class Pyrigee:
 
         # If plot_labels is true, plot points and labels at orbit's apogee and perigee
         if plot_labels:
-            # Scale apogee coordinates for plotting
-            apogee_x_coord = x[0] / self.__TICK_VALUE
-            apogee_y_coord = y[0] / self.__TICK_VALUE
-            apogee_z_coord = z[0] / self.__TICK_VALUE
+            # Plot the apogee and apogee point of this orbit
+            self.__plot_apogee_text(x, y, z, craft.color)
 
-            # Plot point and text at apogee
-            self.__ax.scatter(apogee_x_coord, apogee_y_coord, apogee_z_coord, color = craft.color)
-            self.__ax.text(apogee_x_coord, apogee_y_coord + self.__APSIS_LABEL_OFFSET, apogee_z_coord + self.__APSIS_LABEL_OFFSET, self.__APOGEE_LABEL, color = "white")
-
-            # Index of orbit coordinates of the orbit's perigee
-            perigee_coord_index = int(x.size / 2)
-
-            # Scale perigee coordinates for plotting
-            perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
-            perigee_y_coord = y[perigee_coord_index] / self.__TICK_VALUE
-            perigee_z_coord = z[perigee_coord_index] / self.__TICK_VALUE
-
-            # Plot point and text at perigee
-            self.__ax.scatter(perigee_x_coord, perigee_y_coord, perigee_z_coord, color = craft.color)
-            self.__ax.text(perigee_x_coord, perigee_y_coord + self.__APSIS_LABEL_OFFSET, perigee_z_coord + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
+            # Plot the perigee and perigee point of this orbit
+            self.__plot_perigee_text(x, y, z, craft.color)
 
     '''
     Private helper function that plots parabolic orbits when the eccentricity is very close to 1
@@ -214,20 +227,11 @@ class Pyrigee:
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
         self.__ax.plot(scaled_x, scaled_y, scaled_z, zdir = "z", color = craft.color, label = craft.name)
 
-        # Index of orbit coordinates of the orbit's perigee
-        perigee_coord_index = int(x.size / 2)
-
-        # Scale perigee coordinates for plotting
-        perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
-        perigee_y_coord = y[perigee_coord_index] / self.__TICK_VALUE
-        perigee_z_coord = z[perigee_coord_index] / self.__TICK_VALUE
-
-        # Plot point and text at perigee
-        self.__ax.scatter(perigee_x_coord, perigee_y_coord, perigee_z_coord, color = craft.color)
-        self.__ax.text(perigee_x_coord, perigee_y_coord + self.__APSIS_LABEL_OFFSET, perigee_z_coord + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
+        # Plot the perigee and perigee point of this orbit
+        self.__plot_perigee_text(x, y, z, craft.color)
 
     '''
-    Private method that plots a hohmann transfer orbit. Takes the body being orbited, the initial orbit,
+    Private method that plots a Hohmann transfer orbit. Takes the body being orbited, the initial orbit,
     the craft orbiting, and the target orbit. Also changes the info text to indicate the delta-v of
     the maneuver
     '''
