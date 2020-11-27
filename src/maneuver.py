@@ -6,27 +6,17 @@ import math
 from enum import Enum
 
 '''
-An enum of supported maneuver types
-'''
-class ManeuverType(Enum):
-    HOHMANN_TRANSFER_ORBIT = 0,
-    INCLINATION_CHANGE = 1,
-    BIELLIPTIC_TRANSFER = 2,
-    GEOSTATIONARY_TRANSFER_ORBIT = 3
-
-'''
 Class that allows users to define maneuvers to a target orbit
 '''
 class Maneuver:
     '''
     Takes the name of the new orbit (for legend purposes), an Orbit object
-    describing the new orbit, a ManeuverType enum of the type of 
-    Maneuver to execute, and a color to change appearance of maneuver in plot
+    describing the new orbit, and a color to change appearance of maneuver 
+    in plot
     '''
-    def __init__(self, n, to, ty, c):
+    def __init__(self, n, to, c):
         self.name = n
         self.target_orbit = to
-        self.type = ty
         self.color = c
 
     '''
@@ -41,7 +31,7 @@ class Maneuver:
         delta_v1 = math.sqrt(body.get_std_gravitational_parameter() / r1) * (math.sqrt((2 * r2) / (r1 + r2)) - 1)
         delta_v2 = math.sqrt(body.get_std_gravitational_parameter() / r2) * (1 - (math.sqrt((2 * r1) / (r1 + r2))))
 
-        return delta_v1 + delta_v2
+        return abs(delta_v1) + abs(delta_v2)
 
     '''
     Private helper function that calculates the delta-v needed to do an inclination change. Takes the body being
@@ -58,7 +48,7 @@ class Maneuver:
         # Calculate delta-v needed to do inclination change
         delta_v = 2 * velocity * np.sin(np.radians(inclination_change / 2))
 
-        return delta_v
+        return abs(delta_v)
 
 
     '''
@@ -71,18 +61,15 @@ class Maneuver:
         # Initialize variable to hold total delta-v
         delta_v = 0
 
-        # If the orbit is a Hohmann Transfer Orbit
-        if self.type == ManeuverType.HOHMANN_TRANSFER_ORBIT:
+        # Check that initial and target orbit are both circular (required to do a Hohmann transfer)
+        if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
+            
+            # Calculate total delta-v to perform this maneuver
+            delta_v = self.__calculate_hohmann_transfer_delta_v(body, initial_orbit)
 
-            # Check that initial and target orbit are both circular
-            if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
-                
-                # Calculate total delta-v to perform this maneuver
-                delta_v = self.__calculate_hohmann_transfer_delta_v(body, initial_orbit)
-
-            # If the apogees and perigees are invalid for Hohmann Transfers, throw exception
-            else:
-                raise ValueError("Both initial and target orbits must be circular when performing a Hohmann Transfer Orbit")
+        # If the apogees and perigees are invalid for Hohmann Transfers, throw exception
+        else:
+            raise ValueError("Both initial and target orbits must be circular when performing a Hohmann Transfer Orbit")
 
         # If an inclination change is needed, calculate inclination change delta-v at target orbit apogee
         if initial_orbit.inclination != self.target_orbit.inclination:
