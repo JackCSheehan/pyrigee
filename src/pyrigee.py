@@ -124,9 +124,10 @@ class Pyrigee:
     length. The next parameter indicates if this is a transfer orbit of not. If this is true, only
     half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
-    whether or not the legend should be plotted
+    whether or not the legend should be plotted. negative indicates whether or not the orbit should
+    be graphed backwards (used in plotting certain cases of transfers)
     '''
-    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True):
+    def __plot_elliptical_orbit(self, body, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
@@ -136,6 +137,10 @@ class Pyrigee:
 
         # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
+
+        # Negate r if negative is true
+        if negative:
+            r *= -1
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
         x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
@@ -214,8 +219,15 @@ class Pyrigee:
 
         transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, initial_orbit.inclination)
 
+        # Flag indicating whether transfer should be plotted backwards
+        negative = False
+
+        # If transfer is from larger orbit to smaller orbit, set flag to invert transfer plot
+        if initial_orbit.apogee > target_orbit.apogee:
+            negative = True
+
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(body, transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False)
+        self.__plot_elliptical_orbit(body, transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative)
 
         # Message to show above delta-v readout
         maneuver_message = ""
