@@ -14,8 +14,7 @@ class Maneuver:
     describing the new orbit, and a color to change appearance of maneuver 
     in plot
     '''
-    def __init__(self, n, to, c):
-        self.name = n
+    def __init__(self, to, c):
         self.target_orbit = to
         self.color = c
 

@@ -15,7 +15,7 @@ craft = SPACE_SHUTTLE
 orbit2 = Orbit(100, 100, 0)
 orbit1 = Orbit(40000, 40000, 25)
 
-man = Maneuver("Station Transfer", orbit2, "lightseagreen")
+man = Maneuver(orbit2, "lightseagreen")
 
 p = Pyrigee()
 
