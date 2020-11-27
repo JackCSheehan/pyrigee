@@ -12,14 +12,14 @@ body = EARTH
 
 craft = SPACE_SHUTTLE
 
-orbit2 = Orbit(100, 100, 0)
-orbit1 = Orbit(40000, 40000, 25)
+orbit2 = Orbit(1000000000000000000000000, 100, 0)
+#orbit1 = Orbit(40000, 40000, 25)
 
-man = Maneuver(orbit2, "lightseagreen")
+#man = Maneuver(orbit2, "lightseagreen")
 
 p = Pyrigee()
 
-p.plot(body, orbit1, craft, man)
+p.plot(body, orbit2, craft)
 
 p.visualize()
 
