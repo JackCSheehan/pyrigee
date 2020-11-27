@@ -41,9 +41,6 @@ class Pyrigee:
     '''
     __LIMIT_OFFSET_DIVISOR = 4252
 
-    # Interval in ms for animations
-    __ANIMATION_INTERVAL = 120
-
     '''
     Initialization code for the matplotlib graph including creation of figure, __axes, and
     color settings 
