@@ -8,7 +8,6 @@ import numpy as np
 import math
 from orbit import *
 from craft import *
-from maneuver import ManeuverType
 
 '''
 Class containing methods and constants that allows users to graph orbits
@@ -287,8 +286,8 @@ class Pyrigee:
         # Create custom craft for manuevering to ensure correct appearance of transfer in plot
         maneuver_craft = Craft(craft.name, craft.mass, maneuver.color)
 
-        # Plot orbit based on given type
-        if maneuver.type == ManeuverType.HOHMANN_TRANSFER_ORBIT:
+        # If there is a change in the orbit radius (more extensive checking is done in manuever class)
+        if maneuver.target_orbit.apogee != initial_orbit.apogee:
             self.__plot_hohmann_transfer_orbit(body, initial_orbit, maneuver_craft, maneuver)
 
         # If there is an inclination difference, plot the inclination change arrow indicator

@@ -12,10 +12,10 @@ body = EARTH
 
 craft = SPACE_SHUTTLE
 
-orbit1 = Orbit(100, 100, 0)
-orbit2 = Orbit(40000, 40000, 25)
+orbit2 = Orbit(100, 100, 0)
+orbit1 = Orbit(40000, 40000, 25)
 
-man = Maneuver("Station Transfer", orbit2, ManeuverType.HOHMANN_TRANSFER_ORBIT, "lightseagreen")
+man = Maneuver("Station Transfer", orbit2, "lightseagreen")
 
 p = Pyrigee()
 
