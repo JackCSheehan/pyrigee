@@ -2,11 +2,7 @@
 Example usage of Pyrigee
 '''
 
-from pyrigee import *
-from body import *
-from craft import *
-from orbit import *
-from maneuver import *
+from Pyrigee import *
 
 body = EARTH
 
@@ -17,7 +13,7 @@ orbit2 = Orbit(10000000000000000000000000, 100, 45)
 
 #man = Maneuver(orbit2, "lightseagreen")
 
-p = Pyrigee()
+p = OrbitPlotter()
 
 p.plot(body, orbit2, craft)
 
