@@ -159,16 +159,26 @@ class Pyrigee:
 
         # If plot_labels is true, plot points and labels at orbit's apogee and perigee
         if plot_labels:
+            # Scale apogee coordinates for plotting
+            apogee_x_coord = x[0] / self.__TICK_VALUE
+            apogee_y_coord = y[0] / self.__TICK_VALUE
+            apogee_z_coord = z[0] / self.__TICK_VALUE
+
             # Plot point and text at apogee
-            self.__ax.scatter(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE, z[0] / self.__TICK_VALUE, color = craft.color)
-            self.__ax.text(x[0] / self.__TICK_VALUE, y[0] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, z[0] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, self.__APOGEE_LABEL, color = "white")
+            self.__ax.scatter(apogee_x_coord, apogee_y_coord, apogee_z_coord, color = craft.color)
+            self.__ax.text(apogee_x_coord, apogee_y_coord + self.__APSIS_LABEL_OFFSET, apogee_z_coord + self.__APSIS_LABEL_OFFSET, self.__APOGEE_LABEL, color = "white")
 
             # Index of orbit coordinates of the orbit's perigee
             perigee_coord_index = int(x.size / 2)
 
+            # Scale perigee coordinates for plotting
+            perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
+            perigee_y_coord = y[perigee_coord_index] / self.__TICK_VALUE
+            perigee_z_coord = z[perigee_coord_index] / self.__TICK_VALUE
+
             # Plot point and text at perigee
-            self.__ax.scatter(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE, z[perigee_coord_index] / self.__TICK_VALUE, color = craft.color)
-            self.__ax.text(x[perigee_coord_index] / self.__TICK_VALUE, y[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, z[perigee_coord_index] / self.__TICK_VALUE + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
+            self.__ax.scatter(perigee_x_coord, perigee_y_coord, perigee_z_coord, color = craft.color)
+            self.__ax.text(perigee_x_coord, perigee_y_coord + self.__APSIS_LABEL_OFFSET, perigee_z_coord + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
 
     '''
     Private helper function that plots parabolic orbits when the eccentricity is very close to 1
