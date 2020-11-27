@@ -3,7 +3,6 @@ Main file for the Pyrigee package containing functions that allow users to plot
 orbits and do other calculations
 '''
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 import numpy as np
 import math
 from orbit import *
@@ -244,31 +243,46 @@ class Pyrigee:
     initial and target orbits
     '''
     def __plot_inclination_change_arrow(self, body, craft, initial_orbit, target_orbit):
+        # Variables that will store the value of the highest apogee/perigee between the initial and target orbits
+        highest_apogee = 0
+        highest_perigee = 0
+
+        '''
+        Determine whether the initial or target orbit is the higher one, and set the highest apogee/perigee values as needed.
+        Since transfers are restricted to circular orbits, only one apsis needs to be checked
+        '''
+        if initial_orbit.apogee > target_orbit.apogee:
+            highest_apogee = initial_orbit.apogee
+            highest_perigee = initial_orbit.perigee
+        else:
+            highest_apogee = target_orbit.apogee
+            highest_perigee = target_orbit.perigee
+
         # Scale orbit distances and body radius to ensure that the inclination arrow is plotted to scale
         scaled_body_radius = body.radius / self.__TICK_VALUE
-        scaled_target_apogee = target_orbit.apogee / self.__TICK_VALUE
-        scaled_target_perigee = target_orbit.perigee / self.__TICK_VALUE
+        scaled_apogee = highest_apogee / self.__TICK_VALUE
+        scaled_perigee = highest_perigee / self.__TICK_VALUE
 
-        # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit
-        scaled_target_apoapsis = scaled_target_apogee + scaled_body_radius
-        scaled_target_periapsis = scaled_target_perigee + scaled_body_radius
+        # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit where inclination arrow will be plotted
+        scaled_apoapsis = scaled_apogee + scaled_body_radius
+        scaled_periapsis = scaled_perigee + scaled_body_radius
 
-        # Calculate major axis of the target orbit
-        scaled_target_major_axis = scaled_target_apoapsis + scaled_target_periapsis
+        # Calculate major axis of the orbit
+        scaled_major_axis = scaled_apoapsis + scaled_periapsis
 
-        # Calculate semi-major axis of target orbit
-        scaled_target_semi_major_axis = scaled_target_major_axis / 2
+        # Calculate semi-major axis of orbit
+        scaled_semi_major_axis = scaled_major_axis / 2
 
-        # Calculate eccentricity of target orbit
-        target_eccentricity = (scaled_target_apoapsis - scaled_target_periapsis) / (scaled_target_apoapsis + scaled_target_periapsis)
+        # Calculate eccentricity of orbit
+        eccentricity = (scaled_apoapsis - scaled_periapsis) / (scaled_apoapsis + scaled_periapsis)
 
         # Calculate radius of placement of inclination arrow by using polar equation of ellipse
-        r = (scaled_target_semi_major_axis * (1 - target_eccentricity**2)) / (1 - target_eccentricity * np.cos(2 * np.pi))
+        r = (scaled_semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(2 * np.pi))
 
         # Calculate coordinates of inclination arrow
-        x = r * np.cos(2 * np.pi) * np.cos(np.radians(target_orbit.inclination))
+        x = r * np.cos(2 * np.pi) * np.cos(np.radians(initial_orbit.inclination))
         y = r * np.sin(2 * np.pi)
-        z = r * np.sin(np.radians(target_orbit.inclination)) * np.cos(2 * np.pi)
+        z = r * np.sin(np.radians(initial_orbit.inclination)) * np.cos(2 * np.pi)
 
         # Calculate inclination change
         inclination_change = target_orbit.inclination - initial_orbit.inclination
@@ -285,7 +299,7 @@ class Pyrigee:
         self.__ax.plot(x, y, z, marker = marker, markersize = 15, color = craft.color)
 
         # Plot text next to inclination arrow
-        self.__ax.text(x, y + self.__INCLINATION_LABEL_OFFSET, z, f"Δi = {abs(inclination_change)}°", color = "white")
+        self.__ax.text(x, y + self.__INCLINATION_LABEL_OFFSET, z - self.__INCLINATION_LABEL_OFFSET, f"Δi = {abs(inclination_change)}°", color = "white")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes the
