@@ -34,15 +34,26 @@ class Maneuver:
 
     '''
     Private helper function that calculates the delta-v needed to do an inclination change. Takes the body being
-    orbited and the inclination change between the initial and target orbit. Calculates inclination change at apogee
-    of target orbit for efficiency purposes
+    orbited, the initial orbit, and the inclination change between the initial and target orbit. Calculates inclination 
+    change at the apogee of the higher of the two orbits to ensure the minimum orbit velocity during the manuever
     '''
-    def __calculate_inclination_change_delta_v(self, body, inclination_change):
+    def __calculate_inclination_change_delta_v(self, body, initial_orbit, inclination_change):
         # Get the standard gravitational parameter of the body being orbited
         std_gravitational_parameter = body.get_std_gravitational_parameter()
 
+        # Var to hold the highest of the two apogees
+        highest_apogee = 0
+
+        # If the initial orbit is higher, set highest apogee to the initial orbit's apogee
+        if initial_orbit.apogee > self.target_orbit.apogee:
+            highest_apogee = initial_orbit.apogee
+        
+        # If the target orbit is higher, set highest apogee to the target orbit's apogee
+        else:
+            highest_apogee = target_orbit.apogee
+
         # Calculate orbital velocity of target orbit
-        velocity = math.sqrt(std_gravitational_parameter / (self.target_orbit.apogee + body.radius))
+        velocity = math.sqrt(std_gravitational_parameter / (highest_apogee + body.radius))
 
         # Calculate delta-v needed to do inclination change
         delta_v = 2 * velocity * np.sin(np.radians(inclination_change / 2))
@@ -77,6 +88,6 @@ class Maneuver:
             inclination_change = self.target_orbit.inclination - initial_orbit.inclination
 
             # Add delta-v of inclination change to total delta-v
-            delta_v += abs(self.__calculate_inclination_change_delta_v(body, inclination_change))
+            delta_v += self.__calculate_inclination_change_delta_v(body, initial_orbit, inclination_change)
 
         return delta_v
