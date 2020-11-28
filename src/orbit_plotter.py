@@ -132,10 +132,13 @@ class OrbitPlotter:
     the text to plot at the apogee, and the color of the apogee point to plot
     '''
     def __plot_apogee_text(self, x, y, z, color):
+        # Index of orbit coordinates of the orbit's perigee
+        apogee_coord_index = int(x.size - (x.size / 4))
+
         # Scale apogee coordinates for plotting
-        apogee_x_coord = x[0] / self.__TICK_VALUE
-        apogee_y_coord = y[0] / self.__TICK_VALUE
-        apogee_z_coord = z[0] / self.__TICK_VALUE
+        apogee_x_coord = x[apogee_coord_index] / self.__TICK_VALUE
+        apogee_y_coord = y[apogee_coord_index] / self.__TICK_VALUE
+        apogee_z_coord = z[apogee_coord_index] / self.__TICK_VALUE
 
         # Plot point and text at apogee
         self.__ax.scatter(apogee_x_coord, apogee_y_coord, apogee_z_coord, color = color)
@@ -147,7 +150,7 @@ class OrbitPlotter:
     '''
     def __plot_perigee_text(self, x, y, z, color):
         # Index of orbit coordinates of the orbit's perigee
-        perigee_coord_index = int(x.size / 2)
+        perigee_coord_index = int(x.size / 4)
 
         # Scale perigee coordinates for plotting
         perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
@@ -164,9 +167,9 @@ class OrbitPlotter:
     half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted. negative indicates whether or not the orbit should
-    be graphed backwards (used in plotting certain cases of transfers)
+    be graphed backwards (used in plotting certain cases of transfers). flip_inclination will 
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, flip_inclination = False):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
@@ -185,7 +188,6 @@ class OrbitPlotter:
         x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
         y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
         z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
-
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
 
@@ -318,9 +320,9 @@ class OrbitPlotter:
         r = (scaled_semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(2 * np.pi))
 
         # Calculate coordinates of inclination arrow
-        x = r * np.cos(2 * np.pi) * np.cos(np.radians(initial_orbit.inclination))
-        y = r * np.sin(2 * np.pi)
-        z = r * np.sin(np.radians(initial_orbit.inclination)) * np.cos(2 * np.pi)
+        x = r * np.cos(1.5 * np.pi) * np.cos(np.radians(initial_orbit.inclination))
+        y = r * np.sin(1.5 * np.pi)
+        z = r * np.sin(np.radians(initial_orbit.inclination)) * np.cos(1.5 * np.pi)
 
         # Calculate inclination change
         inclination_change = target_orbit.inclination - initial_orbit.inclination
@@ -363,7 +365,7 @@ class OrbitPlotter:
         
         # If there was only an orbit change
         elif initial_orbit.inclination == maneuver.target_orbit.inclination and initial_orbit.apogee != maneuver.target_orbit.apogee:
-            maneuver_message = "Hohman Transfer"
+            maneuver_message = "Hohmann Transfer"
 
         # If there was only an inclination change
         else:
