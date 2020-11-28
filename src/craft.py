@@ -7,11 +7,10 @@ Class used for defining spacecraft to orbit a body
 '''
 class Craft:
     '''
-    Init function takes craft's name, mass (in kg) and the craft's color
+    Init function takes craft's name and the craft's color
     '''
-    def __init__(self, n, m, c):
+    def __init__(self, n, c):
         self.name = n
-        self.mass = m
         self.color = c
 
 '''
@@ -19,26 +18,26 @@ Sample Craft constants representing some famous crafts
 '''
 
 '''
-NASA's Space Shuttle. Mass based on shuttle wet mass
+NASA's Space Shuttle
 '''
-SPACE_SHUTTLE = Craft("Space Shuttle", 110000, "white")
+SPACE_SHUTTLE = Craft("Space Shuttle", "white")
 
 '''
 The first man-made object in orbit, the Soviet Union's Sputnik 1
 '''
-SPUTNIK_1 = Craft("Sputnik 1", 84, "dimgray")
+SPUTNIK_1 = Craft("Sputnik 1", "dimgray")
 
 '''
 The International Space Station
 '''
-ISS = Craft("ISS", 420000, "salmon")
+ISS = Craft("ISS", "salmon")
 
 '''
 The Soviet Union's/Russia's Mir space station
 '''
-MIR = Craft("Mir", 130000, "firebrick")
+MIR = Craft("Mir", "firebrick")
 
 '''
-NASA's Skylab space station. Mass not counting Apollo crew spacecraft
+NASA's Skylab space station
 '''
-SKYLAB = Craft("Skylab", 77000, "thistle")
+SKYLAB = Craft("Skylab", "thistle")
