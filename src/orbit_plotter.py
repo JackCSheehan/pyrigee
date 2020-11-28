@@ -55,7 +55,7 @@ class OrbitPlotter:
         self.__ax.format_coord = self.__format_coord
 
         # Set default view to see planet from convenient angle
-        self.__ax.view_init(azim = 45, elev = 20)
+        self.__ax.view_init(azim = -45, elev = 20)
         
         # Set background colors to black
         self.__fig.patch.set_facecolor("k")
