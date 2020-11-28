@@ -8,14 +8,14 @@ body = EARTH
 
 craft = SPACE_SHUTTLE
 
+orbit2 = Orbit(10000, 10000, 25)
 orbit1 = Orbit(100, 100, 0)
-orbit2 = Orbit(500, 500, 25)
 
-man = Maneuver(orbit1, "lightseagreen")
+man = Maneuver(orbit2, "lightseagreen")
 
 p = OrbitPlotter(body)
 
-p.plot(orbit2, craft, man)
+p.plot(orbit1, craft, man)
 
 p.visualize()
 

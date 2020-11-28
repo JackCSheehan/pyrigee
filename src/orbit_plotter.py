@@ -248,7 +248,20 @@ class OrbitPlotter:
         # Calculate eccentricity of transfer orbit
         transfer_eccentricity = (transfer_apoapsis - transfer_periapsis) / (transfer_apoapsis + transfer_periapsis)
 
-        transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, initial_orbit.inclination)
+        # Variable to hold the inclination of the transfer orbit
+        transfer_inclination = 0
+
+        '''
+        Determine whether the initial or target orbit is the higher one, and set the transfer inclination as needed.
+        The transfer orbit will be plotted to show path taken either before or after an inclination change, whichever
+        is most efficient
+        '''
+        if initial_orbit.apogee > target_orbit.apogee:
+            transfer_inclination = target_orbit.inclination
+        else:
+            transfer_inclination = initial_orbit.inclination
+
+        transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, transfer_inclination)
 
         # Flag indicating whether transfer should be plotted backwards
         negative = False
