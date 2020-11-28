@@ -6,7 +6,6 @@ import numpy as np
 import math
 from orbit import *
 from craft import *
-import warnings
 
 '''
 Class containing methods and constants that allows users to graph orbits
@@ -234,13 +233,9 @@ class OrbitPlotter:
 
     '''
     Private method that plots a Hohmann transfer orbit. Takes the initial orbit,
-    the craft orbiting, and the target orbit. Also changes the info text to indicate the delta-v of
-    the maneuver
+    the craft orbiting, and the target orbit
     '''
-    def __plot_hohmann_transfer_orbit(self, initial_orbit, craft, maneuver):
-        # Get target orbit from manuever
-        target_orbit = maneuver.target_orbit
-
+    def __plot_hohmann_transfer_orbit(self, initial_orbit, craft, target_orbit):
         # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
         transfer_apogee = target_orbit.apogee
         transfer_perigee = initial_orbit.perigee
@@ -264,18 +259,6 @@ class OrbitPlotter:
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
         self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative)
-
-        # Message to show above delta-v readout
-        maneuver_message = ""
-
-        # Determine which message to show depending on whether or not an inclination change was included
-        if initial_orbit.inclination != maneuver.target_orbit.inclination:
-            maneuver_message = "Hohmann Transfer (with inclination change)"
-        else:
-            maneuver_message = "Hohman Transfer"
-        
-        # Add info text about delta-v needed for this maneuver
-        self.__info_text += f"{craft.name} {maneuver_message}:\nΔV Needed: {maneuver.get_delta_v(self.body, initial_orbit) * 1000:.2f} m/s\n"
 
     '''
     Private method that simply plots the arrow indicating an inclination change. Does not change the info
@@ -335,14 +318,15 @@ class OrbitPlotter:
             marker = "$\\uparrow$"
 
         # Plot an arrow indicating direction of inclination change
-        self.__ax.plot(x, y, z, marker = marker, markersize = 15, color = craft.color)
+        self.__ax.plot(x, y, z, marker = marker, markersize = 15, color = craft.color, label = f"{craft.name} inclination change")
 
         # Plot text next to inclination arrow
         self.__ax.text(x, y + self.__INCLINATION_LABEL_OFFSET, z - self.__INCLINATION_LABEL_OFFSET, f"Δi = {abs(inclination_change)}°", color = "white")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes 
-    the initial orbit, the orbiting craft making the transfer, and the manuever
+    the initial orbit, the orbiting craft making the transfer, and the manuever. Also changes the info text
+    based on what combination of maneuvers was done
     '''
     def __plot_maneuver(self, initial_orbit, craft, maneuver):
         # Create custom craft for manuevering to ensure correct appearance of transfer in plot
@@ -350,11 +334,27 @@ class OrbitPlotter:
 
         # If there is a change in the orbit radius (more extensive checking is done in manuever class)
         if maneuver.target_orbit.apogee != initial_orbit.apogee:
-            self.__plot_hohmann_transfer_orbit(initial_orbit, maneuver_craft, maneuver)
+            self.__plot_hohmann_transfer_orbit(initial_orbit, maneuver_craft, maneuver.target_orbit)
 
         # If there is an inclination difference, plot the inclination change arrow indicator
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
             self.__plot_inclination_change_arrow(maneuver_craft, initial_orbit, maneuver.target_orbit)
+        
+        # Set message of info text depending on what combination of maneuvers was done
+        # If there was both an inclination change and orbit radius change
+        if initial_orbit.inclination != maneuver.target_orbit.inclination and initial_orbit.apogee != maneuver.target_orbit.apogee:
+            maneuver_message = "Hohmann Transfer (with inclination change)"
+        
+        # If there was only an orbit change
+        elif initial_orbit.inclination == maneuver.target_orbit.inclination and initial_orbit.apogee != maneuver.target_orbit.apogee:
+            maneuver_message = "Hohman Transfer"
+
+        # If there was only an inclination change
+        else:
+            maneuver_message = "Inclination Change"
+        
+        # Add info text about delta-v needed for this maneuver
+        self.__info_text += f"{craft.name} {maneuver_message}:\nΔV Needed: {maneuver.get_delta_v(self.body, initial_orbit) * 1000:.2f} m/s\n"
 
     '''
     Function to plot crafts and orbits. Takes an orbit and craft to plot. If given a manuever, the maneuver

@@ -6,6 +6,7 @@ from body import *
 from craft import *
 from orbit import *
 from maneuver import *
+import warnings
 
 # Ignore RuntimeWarning that may result when plotting parabolic orbit (since there is theoretically no end to plot)
 warnings.filterwarnings("ignore", category = RuntimeWarning)
