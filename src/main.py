@@ -1,21 +1,20 @@
-'''
-Example usage of Pyrigee
-'''
-
 from Pyrigee import *
 
-body = EARTH
+# Create a body. Give it a name, mass, radius, and display color
+body = Body("Earth", 5.9722e24, 6378, "cornflowerblue")
 
-craft = SPACE_SHUTTLE
+# Create a craft. Give it a name and a display color
+craft = Craft("Space Shuttle", "white")
 
-orbit2 = Orbit(10000, 100, 25)
-orbit1 = Orbit(200, 200, 0)
+# Create an orbit by defining its apogee, perigee, and inclination, respectively
+orbit = Orbit(400, 400, 0)
 
-man = Maneuver(orbit2, "lightseagreen")
-
+# Create a new orbit plotter to plot a body and orbits around it
 p = OrbitPlotter(body)
 
-p.plot(orbit1, craft)
+# Plot a craft following a particular orbit using the plot function (this can be done many times)
+p.plot(orbit, craft)
 
+# Use visualize() when you're ready to see the result
 p.visualize()
 
