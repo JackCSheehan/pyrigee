@@ -2,8 +2,6 @@
 File containing definition of Orbit class and relevent constants
 '''
 
-from enum import Enum
-
 '''
 Class that allows users to define custom orbits
 '''

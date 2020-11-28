@@ -3,7 +3,6 @@ Class containing defintiion of Maneuver class and relevant constants
 '''
 import numpy as np
 import math
-from enum import Enum
 
 '''
 Class that allows users to define maneuvers to a target orbit
