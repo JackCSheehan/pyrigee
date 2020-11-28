@@ -25,9 +25,6 @@ class Orbit:
         self.perigee = p
         self.inclination = i
 
-    def get_average_height(self):
-        print("average height")
-
 '''
 Sample Orbit constants representing common orbits
 '''
