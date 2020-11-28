@@ -82,6 +82,9 @@ class OrbitPlotter:
         # Plot the give body
         self.__plot_body()
 
+    '''
+    Function that returns the value to be shown in the toolbar on mouse hover
+    '''
     def __format_coord(self, x, y):
         return self.__info_text
 
@@ -343,7 +346,7 @@ class OrbitPlotter:
     '''
     def __plot_maneuver(self, initial_orbit, craft, maneuver):
         # Create custom craft for manuevering to ensure correct appearance of transfer in plot
-        maneuver_craft = Craft(craft.name, craft.mass, maneuver.color)
+        maneuver_craft = Craft(craft.name, maneuver.color)
 
         # If there is a change in the orbit radius (more extensive checking is done in manuever class)
         if maneuver.target_orbit.apogee != initial_orbit.apogee:
