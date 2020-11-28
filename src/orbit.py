@@ -13,6 +13,14 @@ class Orbit:
     Apogee and perigee should be measured from the SURFACE of a body, not it's center
     '''
     def __init__(self, a, p , i):
+        # Check that apogee is greater than or equal to perigee
+        if a < p:
+            raise ValueError("Apogee must be greater than or equal to perigee")
+
+        # Check that neither apogee nor perigee are negative
+        if a < 0 or p < 0:
+            raise ValueError("Apogee and perigee must be greater than zero")
+
         self.apogee = a
         self.perigee = p
         self.inclination = i
