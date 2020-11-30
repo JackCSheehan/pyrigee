@@ -254,31 +254,8 @@ class OrbitPlotter:
             highest_apogee = target_orbit.apogee
             highest_perigee = target_orbit.perigee
 
-        # Scale orbit distances and body radius to ensure that the inclination arrow is plotted to scale
-        scaled_body_radius = self.body.radius / self.__TICK_VALUE
-        scaled_apogee = highest_apogee / self.__TICK_VALUE
-        scaled_perigee = highest_perigee / self.__TICK_VALUE
-
-        # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit where inclination arrow will be plotted
-        scaled_apoapsis = scaled_apogee + scaled_body_radius
-        scaled_periapsis = scaled_perigee + scaled_body_radius
-
-        # Calculate major axis of the orbit
-        scaled_major_axis = scaled_apoapsis + scaled_periapsis
-
-        # Calculate semi-major axis of orbit
-        scaled_semi_major_axis = scaled_major_axis / 2
-
-        # Calculate eccentricity of orbit
-        eccentricity = (scaled_apoapsis - scaled_periapsis) / (scaled_apoapsis + scaled_periapsis)
-
-        # Calculate radius of placement of inclination arrow by using polar equation of ellipse
-        r = (scaled_semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(2 * np.pi))
-
-        # Calculate coordinates of inclination arrow
-        x = r * np.cos(2 * np.pi) * np.cos(np.radians(initial_orbit.inclination))
-        y = r * np.sin(2 * np.pi)
-        z = r * np.sin(np.radians(initial_orbit.inclination)) * np.cos(1.5 * np.pi)
+        # Get coords of inclination change arrow
+        x, y, z = self.__calculator.calculate_inclination_change_arrow_coords(self.body.radius, initial_orbit.inclination, highest_apogee, highest_perigee)
 
         # Calculate inclination change
         inclination_change = target_orbit.inclination - initial_orbit.inclination
