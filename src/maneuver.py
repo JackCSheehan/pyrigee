@@ -76,10 +76,6 @@ class Maneuver:
             # Calculate total delta-v to perform this maneuver
             delta_v = self.__calculate_hohmann_transfer_delta_v(body, initial_orbit)
 
-        # If the apogees and perigees are invalid for Hohmann Transfers, throw exception
-        else:
-            raise ValueError("Both initial and target orbits must be circular when performing a Hohmann Transfer Orbit")
-
         # If an inclination change is needed, calculate inclination change delta-v at target orbit apogee
         if initial_orbit.inclination != self.target_orbit.inclination:
             

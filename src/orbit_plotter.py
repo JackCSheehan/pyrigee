@@ -2,21 +2,17 @@
 File containing OrbitPlotter class definition
 '''
 import matplotlib.pyplot as plt
+from matplotlib import transforms
 import numpy as np
 import math
 from orbit import *
 from craft import *
+from plotting_calculator import *
 
 '''
 Class containing methods and constants that allows users to graph orbits
 '''
 class OrbitPlotter:
-    # The number of divisions in wireframe plots for bodies
-    __PLANET_DIVS = 9j
-
-    # The number of divisions in orbit plots
-    __ORBIT_DIVS = 61
-
     # The number of km that each tick represents
     __TICK_VALUE = 1000
 
@@ -33,6 +29,12 @@ class OrbitPlotter:
     # Offset of inclination label
     __INCLINATION_LABEL_OFFSET = 1.5
 
+    # The number of divisions in wireframe plots for bodies
+    __PLANET_DIVS = 9j
+
+    # The number of divisions in orbit plots
+    __ORBIT_DIVS = 61
+
     ''' 
     Offset for graph x/y limits to ensure graph looks proportional. Divide body by 4252 to get the offset 
     to show body proportionally by matplotlib
@@ -46,6 +48,9 @@ class OrbitPlotter:
     def __init__(self, b):
         self.body = b
 
+        # Create PlottingCalculator instance to do coordinate calculations
+        self.__calculator = PlottingCalculator(self.__TICK_VALUE)
+
         # Create string to hold text that will be shown on side of screen
         self.__info_text = ""
 
@@ -55,16 +60,16 @@ class OrbitPlotter:
         self.__ax.format_coord = self.__format_coord
 
         # Set default view to see planet from convenient angle
-        self.__ax.view_init(azim = -45, elev = 20)
+        self.__ax.view_init(azim = 45, elev = 20)
         
         # Set background colors to black
         self.__fig.patch.set_facecolor("k")
         self.__ax.set_facecolor("k")
 
         # Set x, y, z label to indicate that each tick is equal to the __TICK_VALUE constant
-        self.__ax.set_xlabel(f"{self.__TICK_VALUE} km")
-        self.__ax.set_ylabel(f"{self.__TICK_VALUE} km")
-        self.__ax.set_zlabel(f"{self.__TICK_VALUE} km")
+        self.__ax.set_xlabel(f"{self.__TICK_VALUE} xkm")
+        self.__ax.set_ylabel(f"{self.__TICK_VALUE} ykm")
+        self.__ax.set_zlabel(f"{self.__TICK_VALUE} zkm")
 
         # Change axis colors to white
         self.__ax.xaxis.label.set_color("white")
@@ -92,19 +97,10 @@ class OrbitPlotter:
     Private helper function to plot the body given in the plot function
     '''
     def __plot_body(self):
-        # Create theta and phi values that run from 0 to 2pi and 0 to pi, respectively
-        theta, phi = np.mgrid[0:2 * np.pi:self.__PLANET_DIVS, 0:np.pi:self.__PLANET_DIVS]
-
-        # Scale radius of body to fir in units of plot
+        # Scale radius of body to fit in units of plot
         scaled_radius = self.body.radius / self.__TICK_VALUE
-
-        '''
-        Calculate x, y, and z of sphere given theta and phi ranges. Divide each radius by tick value to make sure
-        that the units are correct when displayed
-        '''
-        x = scaled_radius * np.cos(theta) * np.sin(phi) 
-        y = scaled_radius * np.sin(theta) * np.sin(phi)
-        z = scaled_radius * np.cos(phi)
+        
+        x, y, z = self.__calculator.calculate_body_coords(scaled_radius)
 
         # Calculate graph offset to show body proportionally
         graph_offset = (self.body.radius / self.__LIMIT_OFFSET_DIVISOR)
@@ -121,24 +117,12 @@ class OrbitPlotter:
         self.__ax.plot_wireframe(x, y, z, color = self.body.color)
 
     '''
-    Private helper function that takes x, y, z coordinates and returns the coordinates
-    as a tuple scaled by self.__TICK_VALUE
-    '''
-    def __get_scaled_coordinates(self, x, y, z):
-        return (x / self.__TICK_VALUE, y / self.__TICK_VALUE, z / self.__TICK_VALUE)
-
-    '''
     Private helper function that will plot apogee text given lists of x, y, and z coords, 
     the text to plot at the apogee, and the color of the apogee point to plot
     '''
     def __plot_apogee_text(self, x, y, z, color):
-        # Index of orbit coordinates of the orbit's perigee
-        apogee_coord_index = int(x.size - (x.size / 4))
-
-        # Scale apogee coordinates for plotting
-        apogee_x_coord = x[apogee_coord_index] / self.__TICK_VALUE
-        apogee_y_coord = y[apogee_coord_index] / self.__TICK_VALUE
-        apogee_z_coord = z[apogee_coord_index] / self.__TICK_VALUE
+        # Get coordinates for apogee text
+        apogee_x_coord, apogee_y_coord, apogee_z_coord = self.__calculator.calculate_apogee_text_coords(x, y, z)
 
         # Plot point and text at apogee
         self.__ax.scatter(apogee_x_coord, apogee_y_coord, apogee_z_coord, color = color)
@@ -149,14 +133,10 @@ class OrbitPlotter:
     the text to plot at the perigee, and the color of the perigee point to plot
     '''
     def __plot_perigee_text(self, x, y, z, color):
-        # Index of orbit coordinates of the orbit's perigee
-        perigee_coord_index = int(x.size / 4)
+        # Get perigee coordinates for plotting
+        perigee_x_coord, perigee_y_coord, perigee_z_coord = self.__calculator.calculate_perigee_text_coords(x, y, z)
 
-        # Scale perigee coordinates for plotting
-        perigee_x_coord = x[perigee_coord_index] / self.__TICK_VALUE
-        perigee_y_coord = y[perigee_coord_index] / self.__TICK_VALUE
-        perigee_z_coord = z[perigee_coord_index] / self.__TICK_VALUE
-
+        # Plot point and text at perigee
         self.__ax.scatter(perigee_x_coord, perigee_y_coord, perigee_z_coord, color = color)
         self.__ax.text(perigee_x_coord, perigee_y_coord + self.__APSIS_LABEL_OFFSET, perigee_z_coord + self.__APSIS_LABEL_OFFSET, self.__PERIGEE_LABEL, color = "white")
 
@@ -167,27 +147,14 @@ class OrbitPlotter:
     half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted. negative indicates whether or not the orbit should
-    be graphed backwards (used in plotting certain cases of transfers). flip_inclination will 
+    be graphed backwards (used in plotting certain cases of transfers). side_inclination is an extra
+    value needed to rotate the orbit about the y axis (used for inclination changes where burns are done 
+    apogee at)
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, flip_inclination = False):
-        # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
-        pi_multiplier = -2
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, side_inclination = 0):
+        # Get coordinates of elliptical orbit
+        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, negative, side_inclination)
 
-        # If user only wants to plot half the orbit, change pi multiplier to -1, so that np.linspace goes from 0 to pi
-        if transfer:
-            pi_multiplier = -1
-
-        # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
-        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)))
-
-        # Negate r if negative is true
-        if negative:
-            r *= -1
-
-        # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
-        y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
-        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
 
@@ -199,11 +166,8 @@ class OrbitPlotter:
         if transfer:
             craft_label = f"{craft.name} transfer"
 
-        # Scaled coordinates for plotting
-        scaled_x, scaled_y, scaled_z = self.__get_scaled_coordinates(*(x, y, z))
-
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
-        self.__ax.plot(scaled_x, scaled_y, scaled_z, zdir = "z", color = craft.color, label = craft_label)
+        orbit = self.__ax.plot(x, y, z, zdir = "z", color = craft.color, label = craft_label)
 
         # If plot_labels is true, plot points and labels at orbit's apogee and perigee
         if plot_labels:
@@ -276,7 +240,7 @@ class OrbitPlotter:
             negative = True
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative)
+        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative, True)
 
     '''
     Private method that simply plots the arrow indicating an inclination change. Does not change the info
@@ -320,8 +284,8 @@ class OrbitPlotter:
         r = (scaled_semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(2 * np.pi))
 
         # Calculate coordinates of inclination arrow
-        x = r * np.cos(1.5 * np.pi) * np.cos(np.radians(initial_orbit.inclination))
-        y = r * np.sin(1.5 * np.pi)
+        x = r * np.cos(2 * np.pi) * np.cos(np.radians(initial_orbit.inclination))
+        y = r * np.sin(2 * np.pi)
         z = r * np.sin(np.radians(initial_orbit.inclination)) * np.cos(1.5 * np.pi)
 
         # Calculate inclination change
@@ -377,9 +341,10 @@ class OrbitPlotter:
     '''
     Function to plot crafts and orbits. Takes an orbit and craft to plot. If given a manuever, the maneuver
     will be plotted. plot_labgels indicates whether or not apogee/perigee lables will be plotted. legend indicates
-    whether or not the legend should be plotted
+    whether or not the legend should be plotted. side_inclination is an extra value needed to rotate the orbit about
+    the y axis (used for inclination changes where burns are done at apogee)
     '''
-    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True):
+    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True, side_inclination = 0):
         # Plot the given body
         self.__plot_body()
 
@@ -402,14 +367,17 @@ class OrbitPlotter:
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend)
+            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend, False, side_inclination)
 
         # If user included a manuever, plot the manuever
         if maneuver != None:
             self.__plot_maneuver(orbit, craft, maneuver)
 
-            # After plotting manuever, plot orbit transferred in
-            self.plot(maneuver.target_orbit, craft, None, False, False)
+            # Create transferred orbit to plot after plotting transfer
+            transferred_orbit = Orbit(maneuver.target_orbit.apogee, maneuver.target_orbit.perigee, orbit.inclination)
+
+            # After plotting manuever, plot orbit transferred into
+            self.plot(transferred_orbit, craft, None, False, False, maneuver.target_orbit.inclination)
 
         # Show legend for orbits of given craft if user wants to show legend
         if legend:
