@@ -48,9 +48,6 @@ class PlottingCalculator:
         # Polar equation of ellipse
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))))
 
-        # Try this
-        # http://jwilson.coe.uga.edu/EMAT6680Fa05/Murray/A11/A11.html
-
         # If the cosine of the side inclination results in 0, the user wants a 90 degree side inclination
         if np.cos(side_inclination) == 0:
             # Since cos(90) = 0 and tan(90) is undefined, must set this value to close to 90 but not 90 itself
@@ -63,6 +60,8 @@ class PlottingCalculator:
 
         if side_inclination != 0:
             z = y * np.tan(np.radians(side_inclination))
+        else:
+            z = x * np.tan(np.radians(main_inclination))
 
         # Return the scaled coordinates of the elliptical orbit
         return self.calculate_scaled_coords(x, y, z)
