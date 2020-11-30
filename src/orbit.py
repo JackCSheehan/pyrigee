@@ -10,7 +10,7 @@ class Orbit:
     Init function takes orbit apogee (in km), perigee (in km), and inclination (in degrees).
     Apogee and perigee should be measured from the SURFACE of a body, not it's center
     '''
-    def __init__(self, a, p , i):
+    def __init__(self, a, p, i):
         # Check that apogee is greater than or equal to perigee
         if a < p:
             raise ValueError("Apogee must be greater than or equal to perigee")

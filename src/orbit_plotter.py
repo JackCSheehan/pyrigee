@@ -151,9 +151,9 @@ class OrbitPlotter:
     value needed to rotate the orbit about the y axis (used for inclination changes where burns are done 
     apogee at)
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, side_inclination = 0):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, side_inclination = 0):
         # Get coordinates of elliptical orbit
-        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, negative, side_inclination)
+        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, side_inclination)
 
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
@@ -197,42 +197,11 @@ class OrbitPlotter:
     the craft orbiting, and the target orbit
     '''
     def __plot_hohmann_transfer_orbit(self, initial_orbit, craft, target_orbit):
-        # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
-        transfer_apogee = target_orbit.apogee
-        transfer_perigee = initial_orbit.perigee
-        transfer_apoapsis = transfer_apogee + self.body.radius
-        transfer_periapsis = transfer_perigee + self.body.radius
-
-        # Calculate semi-major axis of transfer orbit
-        transfer_semi_major_axis = (transfer_apoapsis + transfer_periapsis) / 2
-
-        # Calculate eccentricity of transfer orbit
-        transfer_eccentricity = (transfer_apoapsis - transfer_periapsis) / (transfer_apoapsis + transfer_periapsis)
-
-        # Variable to hold the inclination of the transfer orbit
-        transfer_inclination = 0
-
-        '''
-        Determine whether the initial or target orbit is the higher one, and set the transfer inclination as needed.
-        The transfer orbit will be plotted to show path taken either before or after an inclination change, whichever
-        is most efficient
-        '''
-        if initial_orbit.apogee > target_orbit.apogee:
-            transfer_inclination = target_orbit.inclination
-        else:
-            transfer_inclination = initial_orbit.inclination
-
-        transfer_orbit = Orbit(target_orbit.apogee, initial_orbit.perigee, transfer_inclination)
-
-        # Flag indicating whether transfer should be plotted backwards
-        negative = False
-
-        # If transfer is from larger orbit to smaller orbit, set flag to invert transfer plot
-        if initial_orbit.apogee > target_orbit.apogee:
-            negative = True
+        # Calculate the transfer orbit parameters
+        transfer_orbit, transfer_eccentricity, transfer_semi_major_axis = self.__calculator.calculate_transfer_orbit_parameters(initial_orbit, target_orbit, self.body.radius)
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, negative, True)
+        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False)
 
     '''
     Private method that simply plots the arrow indicating an inclination change. Does not change the info
@@ -340,7 +309,7 @@ class OrbitPlotter:
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend, False, side_inclination)
+            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend, side_inclination)
 
         # If user included a manuever, plot the manuever
         if maneuver != None:
