@@ -5,8 +5,8 @@ body = Body("Earth", 5.9722e24, 6378, "cornflowerblue")
 craft = Craft("GOES-16", "chartreuse")
 
 # Create orbits
-initial_orbit = Orbit(400, 400, 0)
-target_orbit = Orbit(400, 400, 25)
+initial_orbit = Orbit(100000, 1, 0)
+target_orbit = Orbit(100000, 1, 90)
 
 maneuver = Maneuver(target_orbit, "red")
 
