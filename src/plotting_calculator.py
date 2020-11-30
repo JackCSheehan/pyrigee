@@ -2,6 +2,7 @@
 File containing the PlottingCalculator class
 '''
 import numpy as np
+from orbit import *
 
 '''
 The PlottingCalculator class contains functions that calculate coordinates for plotting
@@ -36,7 +37,7 @@ class PlottingCalculator:
         return (x, y, z)
 
     # Returns SCALED coords
-    def calculate_elliptical_orbit_coords(self, main_inclination, eccentricity, semi_major_axis, transfer, negative, side_inclination):
+    def calculate_elliptical_orbit_coords(self, main_inclination, eccentricity, semi_major_axis, transfer, side_inclination):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
@@ -49,10 +50,6 @@ class PlottingCalculator:
 
         # Try this
         # http://jwilson.coe.uga.edu/EMAT6680Fa05/Murray/A11/A11.html
-
-        # Negate r if negative is true
-        if negative:
-            r *= -1
 
         # If the cosine of the side inclination results in 0, the user wants a 90 degree side inclination
         if np.cos(side_inclination) == 0:
@@ -83,12 +80,8 @@ class PlottingCalculator:
         # Return the scaled coordinates of the parabolic orbit
         return self.calculate_scaled_coords(x, y, z)
 
+    # Returns SCALED COORDS
     def calculate_inclination_change_arrow_coords(self, body_radius, inclination, apogee, perigee):
-        # Scale orbit distances and body radius to ensure that the inclination arrow is plotted to scale
-        #scaled_body_radius = self.body.radius / self.__tick_value
-        #scaled_apogee = apogee / self.__tick_value
-        #scaled_perigee = perigee / self.__tick_value
-
         # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit where inclination arrow will be plotted
         apoapsis = apogee + body_radius
         periapsis = perigee + body_radius
@@ -134,3 +127,38 @@ class PlottingCalculator:
 
     def calculate_scaled_coords(self, x, y, z):
         return (x / self.__tick_value, y / self.__tick_value, z / self.__tick_value)
+
+    def calculate_transfer_orbit_parameters(self, initial_orbit, target_orbit, body_radius):
+        # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
+        transfer_apogee = target_orbit.apogee
+        transfer_perigee = initial_orbit.perigee
+        transfer_apoapsis = transfer_apogee + body_radius
+        transfer_periapsis = transfer_perigee + body_radius
+
+        # Calculate semi-major axis of transfer orbit
+        transfer_semi_major_axis = (transfer_apoapsis + transfer_periapsis) / 2
+
+        # Calculate eccentricity of transfer orbit
+        transfer_eccentricity = (transfer_apoapsis - transfer_periapsis) / (transfer_apoapsis + transfer_periapsis)
+
+        # Variable to hold the inclination of the transfer orbit
+        transfer_inclination = 0
+
+        '''
+        Determine whether the initial or target orbit is the higher one, and set the transfer inclination as needed.
+        The transfer orbit will be plotted to show path taken either before or after an inclination change, whichever
+        is most efficient
+        '''
+        if initial_orbit.apogee > target_orbit.apogee:
+            transfer_inclination = target_orbit.inclination
+        else:
+            transfer_inclination = initial_orbit.inclination
+
+        # If the transfer apogee < transfer perigee (such as when maneuvering from higher orbit to a lower orbit), flip the values
+        if transfer_apogee < transfer_perigee:
+            temp = transfer_apogee
+            transfer_apogee = transfer_perigee
+            transfer_perigee = temp
+
+        # Return a new orbit that represents the elliptical transfer orbit
+        return (Orbit(transfer_apogee, transfer_perigee, transfer_inclination), transfer_eccentricity, transfer_semi_major_axis)
