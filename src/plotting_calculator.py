@@ -35,6 +35,7 @@ class PlottingCalculator:
 
         return (x, y, z)
 
+    # Returns SCALED coords
     def calculate_elliptical_orbit_coords(self, main_inclination, eccentricity, semi_major_axis, transfer, negative, side_inclination):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
@@ -66,11 +67,21 @@ class PlottingCalculator:
         if side_inclination != 0:
             z = y * np.tan(np.radians(side_inclination))
 
-        # Return the SCALED coordinates of the elliptical orbit
+        # Return the scaled coordinates of the elliptical orbit
         return self.calculate_scaled_coords(x, y, z)
 
-    def calculate_parabolic_orbit_coords(self):
-        print()
+    # Returns SCALED coords
+    def calculate_parabolic_orbit_coords(self, orbit, body_radius):
+        # Polar equation of ellipse
+        r = ((orbit.perigee) * 2 + (body_radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+
+        # Convert polar equations to cartesean coords based on the given orbital inclination
+        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
+        y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+
+        # Return the scaled coordinates of the elliptical orbit
+        return self.calculate_scaled_coords(x, y, z)
 
     def calculate_inclination_change_arrow_coords(self):
         print()

@@ -6,12 +6,12 @@ craft = Craft("GOES-16", "chartreuse")
 
 # Create orbits
 initial_orbit = Orbit(10000000, 1, 0)
-target_orbit = Orbit(10000000, 1, 45)
+#target_orbit = Orbit(10000000, 1, 45)
 
-maneuver = Maneuver(target_orbit, "red")
+#maneuver = Maneuver(target_orbit, "red")
 
 p = OrbitPlotter(body)
 
 # When plotting, pass maneuver as third parameter
-p.plot(initial_orbit, craft, maneuver)
+p.plot(initial_orbit, craft)
 p.visualize()
