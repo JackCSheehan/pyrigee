@@ -80,11 +80,38 @@ class PlottingCalculator:
         y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
         z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
 
-        # Return the scaled coordinates of the elliptical orbit
+        # Return the scaled coordinates of the parabolic orbit
         return self.calculate_scaled_coords(x, y, z)
 
-    def calculate_inclination_change_arrow_coords(self):
-        print()
+    def calculate_inclination_change_arrow_coords(self, body_radius, inclination, apogee, perigee):
+        # Scale orbit distances and body radius to ensure that the inclination arrow is plotted to scale
+        #scaled_body_radius = self.body.radius / self.__tick_value
+        #scaled_apogee = apogee / self.__tick_value
+        #scaled_perigee = perigee / self.__tick_value
+
+        # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit where inclination arrow will be plotted
+        apoapsis = apogee + body_radius
+        periapsis = perigee + body_radius
+
+        # Calculate major axis of the orbit
+        major_axis = apoapsis + periapsis
+
+        # Calculate semi-major axis of orbit
+        semi_major_axis = major_axis / 2
+
+        # Calculate eccentricity of orbit
+        eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
+
+        # Calculate radius of placement of inclination arrow by using polar equation of ellipse
+        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(2 * np.pi))
+
+        # Calculate coordinates of inclination arrow
+        x = r * np.cos(2 * np.pi) * np.cos(np.radians(inclination))
+        y = r * np.sin(2 * np.pi)
+        z = r * np.sin(np.radians(inclination)) * np.cos(1.5 * np.pi)
+
+        # Return the scaled coordinates of the inclination change arrow
+        return self.calculate_scaled_coords(x, y, z)
 
     def calculate_apogee_text_coords(self, x, y, z):
         # Get coordinates of apogee text
