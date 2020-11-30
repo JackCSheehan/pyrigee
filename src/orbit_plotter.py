@@ -183,7 +183,7 @@ class OrbitPlotter:
     reduce redundant code)
     '''
     def __plot_parabolic_orbit(self, orbit, craft, semi_major_axis):
-        # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
+        # Polar equation of ellipse
         r = ((orbit.perigee) * 2 + (self.body.radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
@@ -192,7 +192,7 @@ class OrbitPlotter:
         z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
 
         # Scaled coordinates for plotting
-        scaled_x, scaled_y, scaled_z = self.__get_scaled_coordinates(*(x, y, z))
+        scaled_x, scaled_y, scaled_z = self.__calculator.calculate_scaled_coords(x, y, z)
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
         self.__ax.plot(scaled_x, scaled_y, scaled_z, zdir = "z", color = craft.color, label = craft.name)
@@ -363,6 +363,10 @@ class OrbitPlotter:
 
         # If eccentricity is sufficiently close to 1, plot a parabolic orbit
         if (1 - eccentricity < self.__EPSILON_E):
+            # If an elliptical orbit should be plotted but there is a maneuver, throw ValueError
+            if maneuver:
+                raise ValueError("Cannot perform manuevers when in parabolic escape orbit")
+
             self.__plot_parabolic_orbit(orbit, craft, semi_major_axis)
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit

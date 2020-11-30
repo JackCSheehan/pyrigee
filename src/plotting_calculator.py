@@ -43,7 +43,7 @@ class PlottingCalculator:
         if transfer:
             pi_multiplier = -1
 
-        # Polar equation of ellipse. Uses scaled eccentricity to draw orbit at correct size
+        # Polar equation of ellipse
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))))
 
         # Try this
