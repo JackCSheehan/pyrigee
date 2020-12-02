@@ -48,20 +48,68 @@ class PlottingCalculator:
         # Polar equation of ellipse
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))))
 
-        # If the cosine of the side inclination results in 0, the user wants a 90 degree side inclination
-        if np.cos(side_inclination) == 0:
-            # Since cos(90) = 0 and tan(90) is undefined, must set this value to close to 90 but not 90 itself
-            side_inclination = 89.999
+        theta = np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(main_inclination))
-        y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(side_inclination))
-        z = r * np.sin(np.radians(main_inclination)) * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+        x = r * np.cos(theta) * np.cos(np.radians(0)) # angle = rotation about x-axis
+        y = r * np.sin(theta)* np.cos(np.radians(45)) # angle = rotation about y-axis
 
-        if side_inclination != 0:
-            z = y * np.tan(np.radians(side_inclination))
-        else:
+        # USE THIS WHEN ROTATING ABOUT Y
+        #z = r * np.sin(theta) * np.cos(np.radians(45)) # angle = rotation about y-axis
+
+        # USE THIS WHEN ROTATING ABOUT X
+        #z = r * np.sin(theta) * np.cos(np.radians(45)) # angle = rotation about y-axis
+
+        # If the cosine of the side inclination results in 0, the user wants a 90 degree side inclination
+        #if np.cos(side_inclination) == 0:
+            # Since cos(90) = 0 and tan(90) is undefined, must set this value to close to 90 but not 90 itself
+            #side_inclination = 89.999
+
+        #if np.cos(main_inclination) == 0:
+            #main_inclination = 89.999
+
+        #z = 0
+
+        '''
+        if main_inclination == 0 and side_inclination == 0:
+            x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+            y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+            z = r * 0
+        elif main_inclination != 0 and side_inclination == 0:
+            x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(main_inclination))
+            y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
             z = x * np.tan(np.radians(main_inclination))
+        elif main_inclination == 0 and side_inclination != 0:
+            x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+            y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(side_inclination))
+            z = y * np.tan(np.radians(side_inclination))
+        elif main_inclination == 90 and side_inclination == 90:
+            x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS))
+            y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(side_inclination))
+            z = y * np.tan(np.radians(side_inclination))
+            y *= 0
+        else:
+            x = r * np.cos(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(main_inclination))
+            y = r * np.sin(np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)) * np.cos(np.radians(side_inclination))
+            z = (x * np.sin(np.radians(main_inclination)) + y * np.sin(np.radians(side_inclination)))
+            print("BRUH")
+            
+        #elif main_inclination != 0 and side_inclination != 0:
+            #z = np.sqrt(r**2 - x**2 - y**2)
+
+            #z = (x * np.cos(np.radians(main_inclination)) + y * np.sin(np.radians(side_inclination)))
+        
+        '''
+        '''
+            z1 = z[0:int(z.size / 4)]
+            z2 = z[int(z.size / 4):int(z.size / 2)]
+            z3 = -z[int(z.size / 2):int(3 * z.size / 4)]
+            z4 = -z[int(3 * z.size / 4):z.size]
+
+            z = np.concatenate((z1, z2, z3, z4))
+            (x * np.cos(np.radians(main_inclination)) + y * np.cos(np.radians(side_inclination)))
+            '''
+            #print(z)
 
         # Return the scaled coordinates of the elliptical orbit
         return self.calculate_scaled_coords(x, y, z)
@@ -118,9 +166,9 @@ class PlottingCalculator:
         perigee_coord_index = int(x.size / 2)
 
         # Get coordinates of perigee text
-        perigee_x = x[perigee_coord_index]
-        perigee_y = y[perigee_coord_index]
-        perigee_z = z[perigee_coord_index]
+        perigee_x = 0
+        perigee_y = 0
+        perigee_z = 0
 
         return (perigee_x, perigee_y, perigee_z)
 
