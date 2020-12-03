@@ -47,24 +47,38 @@ class PlottingCalculator:
 
         theta = np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)
 
+        # Convert both inclinations to radians
+        main_inclination = np.radians(main_inclination)
+        side_inclination = np.radians(side_inclination)
+
         # Polar equation of ellipse
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((theta)))
 
-        
-
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(theta) * np.cos(np.radians(0)) # angle = rotation about x-axis
-        y = r * np.sin(theta)* np.cos(np.radians(45)) # angle = rotation about y-axis
+        x = r * np.cos(theta)
+        y = r * np.sin(theta)
+        z = x * np.sin(main_inclination)
+
+        # Calculate vector that the orbit should be rotated about and normalize it
+        rotation_vector = np.array([1, 0, 1 * np.tan(main_inclination)])
+        rotation_unit_vector = rotation_vector / np.linalg.norm(rotation_vector)
+
+        ''' 
+        Use rotation matrix to rotate the orbit points about the rotation vector. Read more about this here:
+        https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
+        '''
+        x = (x * (np.cos(side_inclination) + rotation_unit_vector[0]**2 * (1 - np.cos(side_inclination))) 
+           + y * (rotation_unit_vector[1] * rotation_unit_vector[0] * (1 - np.cos(side_inclination)) + rotation_unit_vector[2] * np.sin(side_inclination)) 
+           + z * (rotation_unit_vector[2] * rotation_unit_vector[0] * (1 - np.cos(side_inclination)) - rotation_unit_vector[1] * np.sin(side_inclination)))
         
-        # ROTATE ABOUT X
-        #z = r * np.cos(theta) * np.cos(np.radians(45))
+        y = (x * (rotation_unit_vector[0] * rotation_unit_vector[1] * (1 - np.cos(side_inclination)) - rotation_unit_vector[2] * np.sin(side_inclination))
+           + y * (np.cos(side_inclination) + rotation_unit_vector[1]**2 * (1 - np.cos(side_inclination)))
+           + z * (rotation_unit_vector[2] * rotation_unit_vector[1] * (1 - np.cos(side_inclination)) + rotation_unit_vector[0] * np.sin(side_inclination)))
 
-        # ROTATE ABOUT Y
-        z = r * np.sin(theta) * np.cos(np.radians(45))
-            
-
-
-
+        z = (x * (rotation_unit_vector[0] * rotation_unit_vector[2] * (1 - np.cos(side_inclination)) + rotation_unit_vector[2] * np.sin(side_inclination))
+           + y * (rotation_unit_vector[1] * rotation_unit_vector[2] * (1 - np.cos(side_inclination)) - rotation_unit_vector[0] * np.sin(side_inclination))
+           + z * (np.cos(side_inclination) + rotation_unit_vector[2]**2 * (1 - np.cos(side_inclination))))
+        
         # Return the scaled coordinates of the elliptical orbit
         return self.calculate_scaled_coords(x, y, z)
 
