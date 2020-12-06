@@ -55,13 +55,15 @@ class PlottingCalculator:
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((theta)))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(theta)
+        x = r * np.cos(theta) * np.cos(main_inclination)
         y = r * np.sin(theta)
         z = x * np.sin(main_inclination)
 
         # Calculate vector that the orbit should be rotated about and normalize it
         rotation_vector = np.array([1, 0, 1 * np.tan(main_inclination)])
         rotation_unit_vector = rotation_vector / np.linalg.norm(rotation_vector)
+
+   # return (np.array([rotation_unit_vector[0]]), np.array([rotation_unit_vector[1]]), np.array([rotation_unit_vector[2]]))
 
         ''' 
         Use rotation matrix to rotate the orbit points about the rotation vector. Read more about this here:
