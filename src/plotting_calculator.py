@@ -2,6 +2,7 @@
 File containing the PlottingCalculator class
 '''
 import numpy as np
+import math
 from orbit import *
 
 '''
@@ -75,30 +76,16 @@ class PlottingCalculator:
         return self.calculate_scaled_coords(x, y, z)
 
     # Returns SCALED COORDS
-    def calculate_inclination_change_arrow_coords(self, body_radius, inclination, apogee, perigee):
+    def calculate_ascending_node_coords(self, body_radius, inclination, apogee, perigee):
         # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit where inclination arrow will be plotted
         apoapsis = apogee + body_radius
         periapsis = perigee + body_radius
 
-        # Calculate major axis of the orbit
-        major_axis = apoapsis + periapsis
-
-        # Calculate semi-major axis of orbit
-        semi_major_axis = major_axis / 2
-
-        # Calculate eccentricity of orbit
-        eccentricity = (apoapsis - periapsis) / (apoapsis + periapsis)
-
-        # Calculate radius of placement of inclination arrow by using polar equation of ellipse
-        r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos(2 * np.pi))
-
-        # Calculate coordinates of inclination arrow
-        x = r * np.cos(2 * np.pi) * np.cos(np.radians(inclination))
-        y = r * np.sin(2 * np.pi)
-        z = r * np.sin(np.radians(inclination)) * np.cos(1.5 * np.pi)
+        # Calculate ascending node height
+        ascending_node_height = math.sqrt(apoapsis * periapsis)
 
         # Return the scaled coordinates of the inclination change arrow
-        return self.calculate_scaled_coords(x, y, z)
+        return self.calculate_scaled_coords(0, -ascending_node_height, 0)
 
     def calculate_apogee_text_coords(self, x, y, z):
         # Get coordinates of apogee text
