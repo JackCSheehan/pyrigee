@@ -23,6 +23,9 @@ class OrbitPlotter:
     __APOGEE_LABEL = "Apogee"
     __PERIGEE_LABEL = "Perigee"
 
+    # Label for ascending node
+    __ASCENDING_NODE_LABEL = "$\Omega$"
+
     # Offset of apogee/perigee labels
     __APSIS_LABEL_OFFSET = .7
 
@@ -206,7 +209,7 @@ class OrbitPlotter:
     Private method that simply plots the arrow indicating an inclination change. Does not change the info
     text or deal directly with the maneuver. Takes the orbiting craft and the initial and target orbits
     '''
-    def __plot_inclination_change_arrow(self, craft, initial_orbit, target_orbit):
+    def __plot_ascending_node(self, craft, initial_orbit, target_orbit):
         # Variables that will store the value of the highest apogee/perigee between the initial and target orbits
         highest_apogee = 0
         highest_perigee = 0
@@ -223,24 +226,10 @@ class OrbitPlotter:
             highest_perigee = target_orbit.perigee
 
         # Get coords of inclination change arrow
-        x, y, z = self.__calculator.calculate_inclination_change_arrow_coords(self.body.radius, initial_orbit.inclination, highest_apogee, highest_perigee)
-
-        # Calculate inclination change
-        inclination_change = target_orbit.inclination - initial_orbit.inclination
-
-        marker = ""
-
-        # set marker type depending on direction of inclination change
-        if inclination_change < 0:
-            marker = "$\\downarrow$"
-        else:
-            marker = "$\\uparrow$"
+        x, y, z = self.__calculator.calculate_ascending_node_coords(self.body.radius, initial_orbit.inclination, highest_apogee, highest_perigee)
 
         # Plot an arrow indicating direction of inclination change
-        self.__ax.plot(x, y, z, marker = marker, markersize = 15, color = craft.color, label = f"{craft.name} inclination change")
-
-        # Plot text next to inclination arrow
-        self.__ax.text(x, y + self.__INCLINATION_LABEL_OFFSET, z - self.__INCLINATION_LABEL_OFFSET, f"Δi = {abs(inclination_change)}°", color = "white")
+        self.__ax.plot(x, y, z, marker = self.__ASCENDING_NODE_LABEL, markersize = 10, color = craft.color, label = f"{craft.name} ascending node")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes 
@@ -257,7 +246,7 @@ class OrbitPlotter:
 
         # If there is an inclination difference, plot the inclination change arrow indicator
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
-            self.__plot_inclination_change_arrow(maneuver_craft, initial_orbit, maneuver.target_orbit)
+            self.__plot_ascending_node(maneuver_craft, initial_orbit, maneuver.target_orbit)
         
         # Set message of info text depending on what combination of maneuvers was done
         # If there was both an inclination change and orbit radius change

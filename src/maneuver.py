@@ -53,16 +53,11 @@ class Maneuver:
         target_orbit_periapsis = self.target_orbit.perigee + body.radius
         target_orbit_ascending_node_height = math.sqrt(target_orbit_apoapsis * target_orbit_periapsis) - body.radius
 
-        print(f"Initial orbit ascending node height: {initial_orbit_ascending_node_height}")
-        print(f"Target orbit ascending node height: {target_orbit_ascending_node_height}")
-
         # Determine the highest ascending node height
         if initial_orbit_ascending_node_height > target_orbit_ascending_node_height:
             highest_ascending_node_height = initial_orbit_ascending_node_height
         else:
             highest_ascending_node_height = target_orbit_ascending_node_height
-
-        print(highest_ascending_node_height)
 
         # Calculate orbital velocity of highest ascending node
         velocity = math.sqrt(std_gravitational_parameter / (highest_ascending_node_height + body.radius))
