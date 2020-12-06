@@ -147,13 +147,12 @@ class OrbitPlotter:
     half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted. negative indicates whether or not the orbit should
-    be graphed backwards (used in plotting certain cases of transfers). side_inclination is an extra
-    value needed to rotate the orbit about the y axis (used for inclination changes where burns are done 
+    be graphed backwards (used in plotting certain cases of transfers)
     apogee at)
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, side_inclination = 0):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True):
         # Get coordinates of elliptical orbit
-        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, side_inclination)
+        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer)
 
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
@@ -279,10 +278,9 @@ class OrbitPlotter:
     '''
     Function to plot crafts and orbits. Takes an orbit and craft to plot. If given a manuever, the maneuver
     will be plotted. plot_labgels indicates whether or not apogee/perigee lables will be plotted. legend indicates
-    whether or not the legend should be plotted. side_inclination is an extra value needed to rotate the orbit about
-    the y axis (used for inclination changes where burns are done at apogee)
+    whether or not the legend should be plotted
     '''
-    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True, side_inclination = 0):
+    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True):
         # Plot the given body
         self.__plot_body()
 
@@ -309,7 +307,7 @@ class OrbitPlotter:
         
         # If the eccentricity is sufficiently less than 1, plot an elliptical orbit
         else:
-            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend, side_inclination)
+            self.__plot_elliptical_orbit(orbit, craft, eccentricity, semi_major_axis, False, plot_labels, legend)
 
         # If user included a manuever, plot the manuever
         if maneuver != None:
@@ -319,7 +317,7 @@ class OrbitPlotter:
             transferred_orbit = Orbit(maneuver.target_orbit.apogee, maneuver.target_orbit.perigee, orbit.inclination)
 
             # After plotting manuever, plot orbit transferred into
-            self.plot(transferred_orbit, craft, None, False, False, maneuver.target_orbit.inclination)
+            self.plot(transferred_orbit, craft, None, False, False)
 
         # Show legend for orbits of given craft if user wants to show legend
         if legend:

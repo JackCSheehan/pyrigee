@@ -34,25 +34,38 @@ class Maneuver:
     '''
     Private helper function that calculates the delta-v needed to do an inclination change. Takes the body being
     orbited, the initial orbit, and the inclination change between the initial and target orbit. Calculates inclination 
-    change at the apogee of the higher of the two orbits to ensure the minimum orbit velocity during the manuever
+    change at the ascending node of the higher of the two orbits to ensure the minimum orbit velocity during the manuever
     '''
     def __calculate_inclination_change_delta_v(self, body, initial_orbit, inclination_change):
         # Get the standard gravitational parameter of the body being orbited
         std_gravitational_parameter = body.get_std_gravitational_parameter()
 
-        # Var to hold the highest of the two apogees
-        highest_apogee = 0
+        # Var to hold the highest of the two ascending nodes
+        highest_ascending_node_height= 0
 
-        # If the initial orbit is higher, set highest apogee to the initial orbit's apogee
-        if initial_orbit.apogee > self.target_orbit.apogee:
-            highest_apogee = initial_orbit.apogee
-        
-        # If the target orbit is higher, set highest apogee to the target orbit's apogee
+        # Calculate ascending node height of the initial orbit
+        initial_orbit_apoapsis =  initial_orbit.apogee + body.radius
+        initial_orbit_periapsis = initial_orbit.perigee + body.radius
+        initial_orbit_ascending_node_height = math.sqrt(initial_orbit_apoapsis * initial_orbit_periapsis) - body.radius
+
+        # Calculate ascending node height of the target orbit
+        target_orbit_apoapsis =  self.target_orbit.apogee + body.radius
+        target_orbit_periapsis = self.target_orbit.perigee + body.radius
+        target_orbit_ascending_node_height = math.sqrt(target_orbit_apoapsis * target_orbit_periapsis) - body.radius
+
+        print(f"Initial orbit ascending node height: {initial_orbit_ascending_node_height}")
+        print(f"Target orbit ascending node height: {target_orbit_ascending_node_height}")
+
+        # Determine the highest ascending node height
+        if initial_orbit_ascending_node_height > target_orbit_ascending_node_height:
+            highest_ascending_node_height = initial_orbit_ascending_node_height
         else:
-            highest_apogee = self.target_orbit.apogee
+            highest_ascending_node_height = target_orbit_ascending_node_height
 
-        # Calculate orbital velocity of target orbit
-        velocity = math.sqrt(std_gravitational_parameter / (highest_apogee + body.radius))
+        print(highest_ascending_node_height)
+
+        # Calculate orbital velocity of highest ascending node
+        velocity = math.sqrt(std_gravitational_parameter / (highest_ascending_node_height + body.radius))
 
         # Calculate delta-v needed to do inclination change
         delta_v = 2 * velocity * np.sin(np.radians(inclination_change / 2))
