@@ -229,7 +229,7 @@ class OrbitPlotter:
         x, y, z = self.__calculator.calculate_ascending_node_coords(self.body.radius, initial_orbit.inclination, highest_apogee, highest_perigee)
 
         # Plot an arrow indicating direction of inclination change
-        self.__ax.plot(x, y, z, marker = self.__ASCENDING_NODE_LABEL, markersize = 10, color = craft.color, label = f"{craft.name} ascending node")
+        self.__ax.plot(x, y, z, marker = self.__ASCENDING_NODE_LABEL, markersize = 10, color = craft.color, label = f"{craft.name} transfer ascending node")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes 
