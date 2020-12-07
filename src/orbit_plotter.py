@@ -153,9 +153,9 @@ class OrbitPlotter:
     be graphed backwards (used in plotting certain cases of transfers)
     apogee at)
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False):
         # Get coordinates of elliptical orbit
-        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer)
+        x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, negative)
 
         # Default label for craft. Needed in case user set legends to false
         craft_label = craft.name
@@ -203,7 +203,7 @@ class OrbitPlotter:
         transfer_orbit, transfer_eccentricity, transfer_semi_major_axis = self.__calculator.calculate_transfer_orbit_parameters(initial_orbit, target_orbit, self.body.radius)
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False)
+        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, False)
 
     '''
     Private method that simply plots the arrow indicating an inclination change. Does not change the info
@@ -229,7 +229,7 @@ class OrbitPlotter:
         x, y, z = self.__calculator.calculate_ascending_node_coords(self.body.radius, initial_orbit.inclination, highest_apogee, highest_perigee)
 
         # Plot an arrow indicating direction of inclination change
-        self.__ax.plot(x, y, z, marker = self.__ASCENDING_NODE_LABEL, markersize = 10, color = craft.color, label = f"{craft.name} transfer ascending node")
+        self.__ax.plot(x, y, z, marker = self.__ASCENDING_NODE_LABEL, markersize = 10, color = craft.color, label = f"{craft.name} ascending node")
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes 
@@ -303,7 +303,7 @@ class OrbitPlotter:
             self.__plot_maneuver(orbit, craft, maneuver)
 
             # Create transferred orbit to plot after plotting transfer
-            transferred_orbit = Orbit(maneuver.target_orbit.apogee, maneuver.target_orbit.perigee, orbit.inclination)
+            transferred_orbit = Orbit(maneuver.target_orbit.apogee, maneuver.target_orbit.perigee, maneuver.target_orbit.inclination)
 
             # After plotting manuever, plot orbit transferred into
             self.plot(transferred_orbit, craft, None, False, False)
