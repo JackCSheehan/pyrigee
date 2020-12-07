@@ -29,15 +29,6 @@ class OrbitPlotter:
     # Offset of apogee/perigee labels
     __APSIS_LABEL_OFFSET = .7
 
-    # Offset of inclination label
-    __INCLINATION_LABEL_OFFSET = 1.5
-
-    # The number of divisions in wireframe plots for bodies
-    __PLANET_DIVS = 9j
-
-    # The number of divisions in orbit plots
-    __ORBIT_DIVS = 61
-
     ''' 
     Offset for graph x/y limits to ensure graph looks proportional. Divide body by 4252 to get the offset 
     to show body proportionally by matplotlib
