@@ -37,8 +37,13 @@ class PlottingCalculator:
 
         return (x, y, z)
 
-    # Returns SCALED coords
-    def calculate_elliptical_orbit_coords(self, main_inclination, eccentricity, semi_major_axis, transfer, negative):
+    '''
+    Calculates the coordinates of an elliptical orbit. Takes the orbits inclination, eccentricty, and semi-major axis.
+    The transfer flag indicates whether or not this is a transfer orbit, in which case only half the orbit will be 
+    calculated. negative indicates whether or not the orbit should be flipped. Returns the x, y, z coords of the 
+    elliptical orbit scaled by __tick_value
+    '''
+    def calculate_elliptical_orbit_coords(self, inclination, eccentricity, semi_major_axis, transfer, negative):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
@@ -49,7 +54,7 @@ class PlottingCalculator:
         theta = np.linspace(pi_multiplier * np.pi, 0, self.__ORBIT_DIVS)
 
         # Convert inclination to radians
-        main_inclination = np.radians(main_inclination)
+        inclination = np.radians(inclination)
 
         # Polar equation of ellipse
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((theta)))
@@ -59,27 +64,36 @@ class PlottingCalculator:
             r *= -1
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(theta) * np.cos(main_inclination)
+        x = r * np.cos(theta) * np.cos(inclination)
         y = r * np.sin(theta)
-        z = x * np.tan(main_inclination)
+        z = x * np.tan(inclination)
         
         # Return the scaled coordinates of the elliptical orbit
         return self.calculate_scaled_coords(x, y, z)
 
-    # Returns SCALED coords
+    '''
+    Calculates the coordinates of a parabolic orbit. Takes an orbit object representing the orbit and the radius of the
+    body being orbited. Returns the x, y, z coords of the orbit scaled by __tick_value
+    '''
     def calculate_parabolic_orbit_coords(self, orbit, body_radius):
+        # Create theta value for periodic plotting
+        theta = np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)
+
         # Polar equation of ellipse
-        r = ((orbit.perigee) * 2 + (body_radius * 2)) / (1 - np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)))
+        r = ((orbit.perigee) * 2 + (body_radius * 2)) / (1 - np.cos(theta))
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
-        x = r * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS)) * np.cos(np.radians(orbit.inclination))
-        y = r * np.sin(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
-        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(np.linspace(0, 2 * np.pi, self.__ORBIT_DIVS))
+        x = r * np.cos(theta) * np.cos(np.radians(orbit.inclination))
+        y = r * np.sin(theta)
+        z = r * np.sin(np.radians(orbit.inclination)) * np.cos(theta)
 
         # Return the scaled coordinates of the parabolic orbit
         return self.calculate_scaled_coords(x, y, z)
 
-    # Returns SCALED COORDS
+    '''
+    Calculates the coordinates of the ascending node. Takes the radius of the body being orbited, the orbits
+    inclination, the apogee, and the perigee/ Returns the coordinates scaled by __tick_value
+    '''
     def calculate_ascending_node_coords(self, body_radius, inclination, apogee, perigee):
         # Calculate the apoapsis/periapsis (distances from center of mass) of target orbit where inclination arrow will be plotted
         apoapsis = apogee + body_radius
