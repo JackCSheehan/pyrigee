@@ -150,26 +150,37 @@ class OrbitPlotter:
     half the orbit is plotted, and the label is changed to indicate a transfer. plot_labels 
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted. negative indicates whether or not the orbit should
-    be graphed backwards (used in plotting certain cases of transfers)
-    apogee at)
+    be graphed backwards (used in plotting certain cases of transfers). in_between indicates whether or not
+    the current plot should be a dashed line; used when the orbit being plotted is an in-between orbit
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, in_between = False):
         # Get coordinates of elliptical orbit
         x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, negative)
 
-        # Default label for craft. Needed in case user set legends to false
-        craft_label = craft.name
-
-        # If no legend should be shown, set label to blank
-        if not legend:
-            craft_label = ""
+        # Default label is the craft's name
+        label = craft.name
 
         # If this is a transfer, change label to reflect 
         if transfer:
-            craft_label = f"{craft.name} transfer"
+            label = f"{craft.name} transfer"
+
+        # If this is an in-between orbit change the label to reflect
+        if in_between:
+            label = f"{craft.name} after inclination change"
+
+        # If no legend should be shown, set label to blank
+        if not legend:
+            label = ""
+
+        # By default, linestyle is 
+        linestyle = "solid"
+
+        # If dashed flag is true, make the marker a dotted line
+        if in_between:
+            linestyle = "dotted"
 
         # Plot the orbit after scaling x and y coords to display in the correct units on graph
-        orbit = self.__ax.plot(x, y, z, zdir = "z", color = craft.color, label = craft_label)
+        orbit = self.__ax.plot(x, y, z, zdir = "z", color = craft.color, label = label, linestyle = linestyle)
 
         # If plot_labels is true, plot points and labels at orbit's apogee and perigee
         if plot_labels:
@@ -199,11 +210,17 @@ class OrbitPlotter:
     the craft orbiting, and the target orbit
     '''
     def __plot_hohmann_transfer_orbit(self, initial_orbit, craft, target_orbit):
-        # Calculate the transfer orbit parameters
-        transfer_orbit, transfer_eccentricity, transfer_semi_major_axis = self.__calculator.calculate_transfer_orbit_parameters(initial_orbit, target_orbit, self.body.radius)
+        # Calculate the transfer orbit elements
+        transfer_orbit, transfer_eccentricity, transfer_semi_major_axis = self.__calculator.calculate_transfer_orbit_elements(initial_orbit, target_orbit, self.body.radius)
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, False, False)
+        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, True, False)
+
+        # Get in-between orbit elements
+        in_between_orbit, in_between_eccentricity, in_between_semi_major_axis = self.__calculator.calculate_in_between_orbit_elements(initial_orbit, target_orbit, self.body.radius)
+
+        # Plot an in-between orbit that shows where a spacecraft will be after an inclination change. Intended to make orbit path clearer
+        self.__plot_elliptical_orbit(in_between_orbit, craft, in_between_eccentricity, in_between_semi_major_axis, False, False, True, False, True)
 
     '''
     Private method that simply plots the arrow indicating an inclination change. Does not change the info

@@ -113,7 +113,7 @@ class PlottingCalculator:
     def calculate_scaled_coords(self, x, y, z):
         return (x / self.__tick_value, y / self.__tick_value, z / self.__tick_value)
 
-    def calculate_transfer_orbit_parameters(self, initial_orbit, target_orbit, body_radius):
+    def calculate_transfer_orbit_elements(self, initial_orbit, target_orbit, body_radius):
         # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
         transfer_apogee = target_orbit.apogee
         transfer_perigee = initial_orbit.perigee
@@ -145,5 +145,19 @@ class PlottingCalculator:
             transfer_apogee = transfer_perigee
             transfer_perigee = temp
 
-        # Return a new orbit that represents the elliptical transfer orbit
+        # Return a new orbit that represents the elliptical transfer orbit, the transfer eccentricity, and the transfer semi-major axis
         return (Orbit(transfer_apogee, transfer_perigee, transfer_inclination), transfer_eccentricity, transfer_semi_major_axis)
+
+    def calculate_in_between_orbit_elements(self, initial_orbit, target_orbit, body_radius):
+        # Calculate in-between orbit apsis
+        in_between_apoapsis = initial_orbit.apogee + body_radius
+        in_between_periapsis = initial_orbit.perigee + body_radius
+
+        # Calculate eccentricity of in-between orbit
+        in_between_eccentricity = (in_between_apoapsis - in_between_periapsis) / (in_between_apoapsis + in_between_periapsis)
+
+        # Calculate semi-major axis of in-between orbit
+        in_between_semi_major_axis = (in_between_apoapsis + in_between_periapsis) / 2
+
+        # Return a new orbit that represents the in-between orbit, the in-between eccentricity, and the in-between semi-major axis
+        return (Orbit(initial_orbit.apogee, initial_orbit.perigee, target_orbit.inclination), in_between_eccentricity, in_between_semi_major_axis)
