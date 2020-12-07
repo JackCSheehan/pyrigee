@@ -38,7 +38,7 @@ class PlottingCalculator:
         return (x, y, z)
 
     # Returns SCALED coords
-    def calculate_elliptical_orbit_coords(self, main_inclination, eccentricity, semi_major_axis, transfer):
+    def calculate_elliptical_orbit_coords(self, main_inclination, eccentricity, semi_major_axis, transfer, negative):
         # Number to multiply by pi by when bounding np.linepace. Default is -2 to plot an entire polar coordinate
         pi_multiplier = -2
 
@@ -53,6 +53,10 @@ class PlottingCalculator:
 
         # Polar equation of ellipse
         r = (semi_major_axis * (1 - eccentricity**2)) / (1 - eccentricity * np.cos((theta)))
+
+        # Flip orbit if negative flag is true
+        if negative:
+            r *= -1
 
         # Convert polar equations to cartesean coords based on the given orbital inclination
         x = r * np.cos(theta) * np.cos(main_inclination)
@@ -100,9 +104,9 @@ class PlottingCalculator:
         perigee_coord_index = int(x.size / 2)
 
         # Get coordinates of perigee text
-        perigee_x = 0
-        perigee_y = 0
-        perigee_z = 0
+        perigee_x = x[perigee_coord_index]
+        perigee_y = y[perigee_coord_index]
+        perigee_z = z[perigee_coord_index]
 
         return (perigee_x, perigee_y, perigee_z)
 
