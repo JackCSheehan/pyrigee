@@ -49,7 +49,7 @@ class OrbitPlotter:
 
         # Standard matplotlib initialization items
         self.__fig = plt.figure()
-        self.__ax = self.__fig.add_subplot(111, projection = "3d", proj_type = "ortho")
+        self.__ax = self.__fig.add_subplot(111, projection = "3d")
         self.__ax.format_coord = self.__format_coord
 
         # Set default view to see planet from convenient angle
