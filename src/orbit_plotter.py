@@ -260,6 +260,9 @@ class OrbitPlotter:
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
             # Plot ascending node
             self.__plot_ascending_node(maneuver_craft, initial_orbit, maneuver.target_orbit)
+
+            # Plot in-between orbit
+            self.__plot_in_between_orbit(maneuver_craft, initial_orbit, maneuver.target_orbit)
         
         # Set message of info text depending on what combination of maneuvers was done
         # If there was both an inclination change and orbit radius change

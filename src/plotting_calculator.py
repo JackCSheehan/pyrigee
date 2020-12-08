@@ -185,9 +185,28 @@ class PlottingCalculator:
     and Hohmann Transfer Orbits. Takes the initial orbit, the target orbit, and the radius of the body being orbited
     '''
     def calculate_in_between_orbit_elements(self, initial_orbit, target_orbit, body_radius):
+        # Variables to hold in-between apogee and perigee
+        in_between_apogee = 0
+        in_between_perigee = 0
+
+        # Variable to hold inclination of the in-between orbit
+        in_between_inclination = 0
+
+        # If maneuver shrinks the orbit
+        if initial_orbit.apogee > target_orbit.apogee:
+            in_between_apogee = initial_orbit.apogee
+            in_between_perigee = initial_orbit.perigee
+            in_between_inclination = target_orbit.inclination
+
+        # If the maneuver expands the orbit
+        else:
+            in_between_apogee = target_orbit.apogee
+            in_between_perigee = target_orbit.perigee
+            in_between_inclination = initial_orbit.inclination
+
         # Calculate in-between orbit apsis
-        in_between_apoapsis = initial_orbit.apogee + body_radius
-        in_between_periapsis = initial_orbit.perigee + body_radius
+        in_between_apoapsis = in_between_apogee + body_radius
+        in_between_periapsis = in_between_perigee + body_radius
 
         # Calculate eccentricity of in-between orbit
         in_between_eccentricity = (in_between_apoapsis - in_between_periapsis) / (in_between_apoapsis + in_between_periapsis)
@@ -196,4 +215,4 @@ class PlottingCalculator:
         in_between_semi_major_axis = (in_between_apoapsis + in_between_periapsis) / 2
 
         # Return a new orbit that represents the in-between orbit, the in-between eccentricity, and the in-between semi-major axis
-        return (Orbit(initial_orbit.apogee, initial_orbit.perigee, target_orbit.inclination), in_between_eccentricity, in_between_semi_major_axis)
+        return (Orbit(in_between_apogee, in_between_perigee, in_between_inclination), in_between_eccentricity, in_between_semi_major_axis)
