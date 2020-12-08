@@ -105,6 +105,10 @@ class PlottingCalculator:
         # Return the scaled coordinates of the inclination change arrow
         return self.calculate_scaled_coords(0, -ascending_node_height, 0)
 
+    '''
+    Calculates the coordinates of the apogee text annotation. Takes the x, y, and z coordinates of the orbit, each
+    as a list of numbers
+    '''
     def calculate_apogee_text_coords(self, x, y, z):
         # Get coordinates of apogee text
         apogee_x = x[0]
@@ -113,6 +117,10 @@ class PlottingCalculator:
 
         return (apogee_x, apogee_y, apogee_z)
     
+    '''
+    Calculates the coordinates of the perigee text annotation. Takes the x, y, and z coordinates of the orbit, each
+    as a list of numbers
+    '''
     def calculate_perigee_text_coords(self, x, y, z):
         # Index of orbit coordinates of the orbit's perigee
         perigee_coord_index = int(x.size / 2)
@@ -124,9 +132,18 @@ class PlottingCalculator:
 
         return (perigee_x, perigee_y, perigee_z)
 
+    '''
+    Takes three lists, each representing x, y, and z coordinates, respectively. Returns these coordinates scaled
+    by __tick_value
+    '''
     def calculate_scaled_coords(self, x, y, z):
         return (x / self.__tick_value, y / self.__tick_value, z / self.__tick_value)
 
+    '''
+    Calculates the orbit, eccentricity, and semi-major axis of the transfer orbit. The transfer orbit is the elliptical
+    orbit that transitions from one circular orbit to another. Takes the initial orbit, the target orbit, and the radius
+    of the body being orbited
+    '''
     def calculate_transfer_orbit_elements(self, initial_orbit, target_orbit, body_radius):
         # Calculate apogee, perigee, apoapsis, and periapsis of the transfer orbit
         transfer_apogee = target_orbit.apogee
@@ -162,6 +179,11 @@ class PlottingCalculator:
         # Return a new orbit that represents the elliptical transfer orbit, the transfer eccentricity, and the transfer semi-major axis
         return (Orbit(transfer_apogee, transfer_perigee, transfer_inclination), transfer_eccentricity, transfer_semi_major_axis)
 
+    '''
+    Calculates the orbit, eccentricity, and semi-major axis of the in-between orbit. The in-between orbit is the orbit the
+    spacecraft will be in after an inclination change to show how the spacecraft will transition between inclination changes
+    and Hohmann Transfer Orbits. Takes the initial orbit, the target orbit, and the radius of the body being orbited
+    '''
     def calculate_in_between_orbit_elements(self, initial_orbit, target_orbit, body_radius):
         # Calculate in-between orbit apsis
         in_between_apoapsis = initial_orbit.apogee + body_radius

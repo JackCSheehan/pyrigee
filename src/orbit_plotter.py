@@ -2,7 +2,6 @@
 File containing OrbitPlotter class definition
 '''
 import matplotlib.pyplot as plt
-from matplotlib import transforms
 import numpy as np
 import math
 from orbit import *
