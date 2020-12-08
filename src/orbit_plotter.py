@@ -60,9 +60,9 @@ class OrbitPlotter:
         self.__ax.set_facecolor("k")
 
         # Set x, y, z label to indicate that each tick is equal to the __TICK_VALUE constant
-        self.__ax.set_xlabel(f"{self.__TICK_VALUE} xkm")
-        self.__ax.set_ylabel(f"{self.__TICK_VALUE} ykm")
-        self.__ax.set_zlabel(f"{self.__TICK_VALUE} zkm")
+        self.__ax.set_xlabel(f"{self.__TICK_VALUE} km")
+        self.__ax.set_ylabel(f"{self.__TICK_VALUE} km")
+        self.__ax.set_zlabel(f"{self.__TICK_VALUE} km")
 
         # Change axis colors to white
         self.__ax.xaxis.label.set_color("white")
@@ -206,14 +206,8 @@ class OrbitPlotter:
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
         self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, True, False)
 
-        # Get in-between orbit elements
-        in_between_orbit, in_between_eccentricity, in_between_semi_major_axis = self.__calculator.calculate_in_between_orbit_elements(initial_orbit, target_orbit, self.body.radius)
-
-        # Plot an in-between orbit that shows where a spacecraft will be after an inclination change. Intended to make orbit path clearer
-        self.__plot_elliptical_orbit(in_between_orbit, craft, in_between_eccentricity, in_between_semi_major_axis, False, False, True, False, True)
-
     '''
-    Private method that simply plots the arrow indicating an inclination change. Does not change the info
+    Private method that plots the arrow indicating an inclination change. Does not change the info
     text or deal directly with the maneuver. Takes the orbiting craft and the initial and target orbits
     '''
     def __plot_ascending_node(self, craft, initial_orbit, target_orbit):
@@ -239,6 +233,17 @@ class OrbitPlotter:
         self.__ax.plot(x, y, z, marker = self.__ASCENDING_NODE_LABEL, markersize = 10, color = craft.color, label = f"{craft.name} ascending node")
 
     '''
+    Private method that plots the in-between orbit when an inclination change is present. An in-between orbits
+    attempts to show the result of inclination changes so that complicated maneuvers are easier to understand
+    '''
+    def __plot_in_between_orbit(self, craft, initial_orbit, target_orbit):
+        # Get in-between orbit elements
+        in_between_orbit, in_between_eccentricity, in_between_semi_major_axis = self.__calculator.calculate_in_between_orbit_elements(initial_orbit, target_orbit, self.body.radius)
+
+        # Plot an in-between orbit that shows where a spacecraft will be after an inclination change. Intended to make orbit path clearer
+        self.__plot_elliptical_orbit(in_between_orbit, craft, in_between_eccentricity, in_between_semi_major_axis, False, False, True, False, True)
+
+    '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes 
     the initial orbit, the orbiting craft making the transfer, and the manuever. Also changes the info text
     based on what combination of maneuvers was done
@@ -251,8 +256,9 @@ class OrbitPlotter:
         if maneuver.target_orbit.apogee != initial_orbit.apogee:
             self.__plot_hohmann_transfer_orbit(initial_orbit, maneuver_craft, maneuver.target_orbit)
 
-        # If there is an inclination difference, plot the inclination change arrow indicator
+        # If there is an inclination difference, plot the ascending node indicator and the in-between orbit
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
+            # Plot ascending node
             self.__plot_ascending_node(maneuver_craft, initial_orbit, maneuver.target_orbit)
         
         # Set message of info text depending on what combination of maneuvers was done
