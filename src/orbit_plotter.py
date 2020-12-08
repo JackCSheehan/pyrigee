@@ -141,26 +141,17 @@ class OrbitPlotter:
     indicates whether or not the apogee/perigee labels should be plotted. legend indicates 
     whether or not the legend should be plotted. negative indicates whether or not the orbit should
     be graphed backwards (used in plotting certain cases of transfers). in_between indicates whether or not
-    the current plot should be a dashed line; used when the orbit being plotted is an in-between orbit
+    the current plot should be a dashed line; used when the orbit being plotted is an in-between orbit.
+    label is used to set the legend text for this particular orbit if it needs to be different from
+    the default
     '''
-    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, in_between = False):
+    def __plot_elliptical_orbit(self, orbit, craft, eccentricity, semi_major_axis, transfer = False, plot_labels = True, legend = True, negative = False, in_between = False, label = craft.name):
         # Get coordinates of elliptical orbit
         x, y, z = self.__calculator.calculate_elliptical_orbit_coords(orbit.inclination, eccentricity, semi_major_axis, transfer, negative)
 
-        # Default label is the craft's name
-        label = craft.name
-
-        # If this is a transfer, change label to reflect 
-        if transfer:
-            label = f"{craft.name} transfer"
-
-        # If this is an in-between orbit change the label to reflect
-        if in_between:
-            label = f"{craft.name} after inclination change"
-
         # If no legend should be shown, set label to blank
         if not legend:
-            label = ""
+            custom_label = ""
 
         # By default, linestyle is 
         linestyle = "solid"
@@ -204,7 +195,7 @@ class OrbitPlotter:
         transfer_orbit, transfer_eccentricity, transfer_semi_major_axis = self.__calculator.calculate_transfer_orbit_elements(initial_orbit, target_orbit, self.body.radius)
 
         # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
-        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, True, False)
+        self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, True, False, f"{craft.name} transfer")
 
     '''
     Private method that plots the arrow indicating an inclination change. Does not change the info
@@ -240,8 +231,20 @@ class OrbitPlotter:
         # Get in-between orbit elements
         in_between_orbit, in_between_eccentricity, in_between_semi_major_axis = self.__calculator.calculate_in_between_orbit_elements(initial_orbit, target_orbit, self.body.radius)
 
+        label = ""
+
+        # If this is an in-between orbit change the label to reflect
+        if in_between:
+            # If maneuver shrinks the orbit
+            if initial_orbit.apogee > target_orbit.apogee:
+                label = f"{craft.name} after inclination change"
+
+            # If the maneuver expands the orbit
+            else:
+                label = f"{craft.name} before inclination change"
+
         # Plot an in-between orbit that shows where a spacecraft will be after an inclination change. Intended to make orbit path clearer
-        self.__plot_elliptical_orbit(in_between_orbit, craft, in_between_eccentricity, in_between_semi_major_axis, False, False, True, False, True)
+        self.__plot_elliptical_orbit(in_between_orbit, craft, in_between_eccentricity, in_between_semi_major_axis, False, False, True, False, True, label)
 
     '''
     Private helper function that calls the correct plotting function to plot the given manuever. Takes 
