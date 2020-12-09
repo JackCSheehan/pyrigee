@@ -9,7 +9,7 @@ $ pip install pyrigee
 
 # :paperclip: Dependencies
 * Matplotlib
-* Numpy
+* NumPy
 
 # :computer: Examples
 
@@ -39,6 +39,7 @@ p.visualize()
 ```
 
 This will produce the following plot:
+
 ![demo1]()
 
 ## :triangular_ruler: Inclined Orbits
@@ -49,6 +50,7 @@ For example, this:
 orbit = Orbit(400, 400, 45)
 ```
 ...would produce the following plot:
+
 ![demo2]()
 
 ##  :milky_way: Parabolic Escape Orbits
@@ -57,10 +59,13 @@ When the eccentricity of your defined orbit becomes sufficnetly close to 1 (with
 ```
 orbit = Orbit(4000000000, 400, 0)
 ```
+
 ![demo3]()
 
 # :rocket: Maneuvers
 Pyrigee will plot Hohmann Transfer Orbits, inclination changes, and combinations of both. To plot a maneuver, create a target orbit and maneuver object.
+
+## :straight_ruler: Simple Maneuvers (Basic Hohmann Transfer)
 
 ```
 from Pyrigee import *
@@ -84,4 +89,21 @@ p.plot(initial_orbit, craft, maneuver)
 
 p.visualize()
 ```
+
+![demo4]()
+
+## :gear: Complicated Maneuvers (Transfer + Inclination Change)
+Target orbits that have a different inclination than their corresponding initial orbits result in maneuvers with an inclination change.
+
+```
+initial_orbit = Orbit(400, 400, 0)
+target_orbit = Orbit(2000, 2000, 45)
+maneuver = Maneuver(target_orbit, "firebrick")
+```
+
+![demo5]()
+
+The solid green lines represent the initial and target orbits defined for the craft (only the initial orbit is given apogee/perigee labels). The solid red line represents half of the elliptical transfer orbit taken by the craft to move from one orbit to another. Finally, the dotted line represents the orbit entered before or after an inclination change. The dotted line attempts to show the relationship between the inclination change manuever and the Hohmann Transfer, which are calculated two separate maneuvers rather than a single maneuver.
+
+In this particular example, the spacecraft will move from the inner green orbit along the solid red line until it gets to the orbit represented by the dotted red line. Next, the spacecraft will do a burn at the ascending node to incline its orbit 45 degrees, brining it to the outer green orbit.
 
