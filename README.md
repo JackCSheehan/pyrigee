@@ -40,7 +40,7 @@ p.visualize()
 
 This will produce the following plot:
 
-![demo1](https://raw.githubusercontent.com/jackcsheehan/pyrigee/main/.github/images/demo1.png)
+![demo1](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo1.png)
 
 ## :triangular_ruler: Inclined Orbits
 The third positional argument of the Orbit constructor is the inclination of the orbit **in degrees**. Providing this argument will result in the orbit being rotated about the axis of the ascending node.
@@ -51,7 +51,7 @@ orbit = Orbit(400, 400, 45)
 ```
 ...would produce the following plot:
 
-![demo2]()
+![demo2](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo2.png)
 
 ##  :milky_way: Parabolic Escape Orbits
 When the eccentricity of your defined orbit becomes sufficnetly close to 1 (within `__EPSILON_E`, defined in `orbit_plotter.py`), a parabolic orbit will be plotted.
@@ -60,7 +60,7 @@ When the eccentricity of your defined orbit becomes sufficnetly close to 1 (with
 orbit = Orbit(4000000000, 400, 0)
 ```
 
-![demo3]()
+![demo3](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo3.png)
 
 # :rocket: Maneuvers
 Pyrigee will plot Hohmann Transfer Orbits, inclination changes, and combinations of both. To plot a maneuver, create a target orbit and maneuver object.
@@ -90,7 +90,7 @@ p.plot(initial_orbit, craft, maneuver)
 p.visualize()
 ```
 
-![demo4]()
+![demo4](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo4.png)
 
 ## :gear: Complicated Maneuvers (Transfer + Inclination Change)
 Target orbits that have a different inclination than their corresponding initial orbits result in maneuvers with an inclination change.
@@ -101,7 +101,7 @@ target_orbit = Orbit(2000, 2000, 45)
 maneuver = Maneuver(target_orbit, "firebrick")
 ```
 
-![demo5]()
+![demo5](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo5.png)
 
 The solid green lines represent the initial and target orbits defined for the craft (only the initial orbit is given apogee/perigee labels). The solid red line represents half of the elliptical transfer orbit taken by the craft to move from one orbit to another. Finally, the dotted line represents the orbit entered before or after an inclination change. The dotted line attempts to show the relationship between the inclination change manuever and the Hohmann Transfer, which are calculated two separate maneuvers rather than a single maneuver.
 
