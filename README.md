@@ -63,7 +63,7 @@ orbit = Orbit(4000000000, 400, 0)
 ![demo3](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo3.png)
 
 # :rocket: Maneuvers
-Pyrigee will plot Hohmann Transfer Orbits, inclination changes, and combinations of both. To plot a maneuver, create a target orbit and maneuver object.
+Pyrigee will plot Hohmann transfer Orbits, inclination changes, and combinations of both. To plot a maneuver, create a target orbit and maneuver object.
 
 ## :straight_ruler: Simple Maneuvers (Basic Hohmann Transfer)
 
@@ -103,7 +103,24 @@ maneuver = Maneuver(target_orbit, "firebrick")
 
 ![demo5](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/demo5.png)
 
-The solid green lines represent the initial and target orbits defined for the craft (only the initial orbit is given apogee/perigee labels). The solid red line represents half of the elliptical transfer orbit taken by the craft to move from one orbit to another. Finally, the dotted line represents the orbit entered before or after an inclination change. The dotted line attempts to show the relationship between the inclination change manuever and the Hohmann Transfer, which are calculated two separate maneuvers rather than a single maneuver.
+The solid green lines represent the initial and target orbits defined for the craft (only the initial orbit is given apogee/perigee labels). The solid red line represents half of the elliptical transfer orbit taken by the craft to move from one orbit to another. Finally, the dotted line represents the orbit entered before or after an inclination change. The dotted line attempts to show the relationship between the inclination change manuever and the Hohmann transfer, which are calculated two separate maneuvers rather than a single maneuver.
 
 In this particular example, the spacecraft will move from the inner green orbit along the solid red line until it gets to the orbit represented by the dotted red line. Next, the spacecraft will do a burn at the ascending node to incline its orbit 45 degrees, brining it to the outer green orbit.
 
+# :chart_with_upwards_trend: Delta-V Calculations
+Pyrigee automatically calculates the delta-v needed to perform manuevers. For maneuvers involving both a Hohmann transfer and an inclination change, Pyrigee will calculate the delta-v needed to do two separate maneuvers in order to take the most efficient path to the target orbit. Pyrigee will calculate inclination changes, in particular, while in the highest orbit provided. If the initial orbit is higher than the target orbit, for example, Pyrigee will do the inclination change while still in the initial orbit and vice versa. This is because inclination changes are cheapest when instantaneous velocity is lowest.
+
+The delta-v calculations appear in the toolbar section of the Matplotlib window.
+
+![deltav]()
+
+# :bookmark: Informational Resources
+Below are some helpful resources for learning more about orbits and maneuvers.
+## :black_nib: Orbital Mechanics
+* [Kepler's Laws](https://en.wikipedia.org/wiki/Kepler%27s_laws_of_planetary_motion)
+* [Orbital Eccentricity](https://en.wikipedia.org/wiki/Orbital_eccentricity)
+* [Elliptic Orbit](https://en.wikipedia.org/wiki/Elliptic_orbit)
+
+## :pencil2: Orbital Manuevers
+* [Hohmann Transfer Orbit](https://en.wikipedia.org/wiki/Hohmann_transfer_orbit)
+* [Inclination Change](https://en.wikipedia.org/wiki/Orbital_inclination_change)
