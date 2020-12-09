@@ -40,7 +40,7 @@ p.visualize()
 
 This will produce the following plot:
 
-![demo1]()
+![demo1](https://raw.githubusercontent.com/jackcsheehan/pyrigee/main/.github/images/demo1.png)
 
 ## :triangular_ruler: Inclined Orbits
 The third positional argument of the Orbit constructor is the inclination of the orbit **in degrees**. Providing this argument will result in the orbit being rotated about the axis of the ascending node.
