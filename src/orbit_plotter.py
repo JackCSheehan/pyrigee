@@ -261,18 +261,18 @@ class OrbitPlotter:
         if maneuver.target_orbit.apogee != initial_orbit.apogee:
             self.__plot_hohmann_transfer_orbit(initial_orbit, maneuver_craft, maneuver.target_orbit)
 
-        # If there is an inclination difference, plot the ascending node indicator and the in-between orbit
+        # If there is an inclination difference, plot the ascending node indicator
         if initial_orbit.inclination != maneuver.target_orbit.inclination:
             # Plot ascending node
             self.__plot_ascending_node(maneuver_craft, initial_orbit, maneuver.target_orbit)
+        
+        # Set message of info text depending on what combination of maneuvers was done
+        # If there was both an inclination change and orbit radius change (and plot an in-between orbit)
+        if initial_orbit.inclination != maneuver.target_orbit.inclination and initial_orbit.apogee != maneuver.target_orbit.apogee:
+            maneuver_message = "Hohmann Transfer (with inclination change)"
 
             # Plot in-between orbit
             self.__plot_in_between_orbit(maneuver_craft, initial_orbit, maneuver.target_orbit)
-        
-        # Set message of info text depending on what combination of maneuvers was done
-        # If there was both an inclination change and orbit radius change
-        if initial_orbit.inclination != maneuver.target_orbit.inclination and initial_orbit.apogee != maneuver.target_orbit.apogee:
-            maneuver_message = "Hohmann Transfer (with inclination change)"
         
         # If there was only an orbit change
         elif initial_orbit.inclination == maneuver.target_orbit.inclination and initial_orbit.apogee != maneuver.target_orbit.apogee:
