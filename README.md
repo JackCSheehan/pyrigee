@@ -107,13 +107,6 @@ The solid green lines represent the initial and target orbits defined for the cr
 
 In this particular example, the spacecraft will move from the inner green orbit along the solid red line until it gets to the orbit represented by the dotted red line. Next, the spacecraft will do a burn at the ascending node to incline its orbit 45 degrees, brining it to the outer green orbit.
 
-# :chart_with_upwards_trend: Delta-V Calculations
-Pyrigee automatically calculates the delta-v needed to perform manuevers. For maneuvers involving both a Hohmann transfer and an inclination change, Pyrigee will calculate the delta-v needed to do two separate maneuvers in order to take the most efficient path to the target orbit. Pyrigee will calculate inclination changes, in particular, while in the highest orbit provided. If the initial orbit is higher than the target orbit, for example, Pyrigee will do the inclination change while still in the initial orbit and vice versa. This is because inclination changes are cheapest when instantaneous velocity is lowest.
-
-The delta-v calculations appear in the toolbar section of the Matplotlib window.
-
-![deltav](https://raw.githubusercontent.com/JackCSheehan/pyrigee/main/assets/deltav.png)
-
 # :bookmark: Informational Resources
 Below are some helpful resources for learning more about orbits and maneuvers.
 ## :black_nib: Orbital Mechanics
