@@ -50,7 +50,6 @@ class OrbitPlotter:
         # Standard matplotlib initialization items
         self.__fig = plt.figure()
         self.__ax = self.__fig.add_subplot(111, projection = "3d")
-        self.__ax.format_coord = self.__format_coord
 
         # Set default view to see planet from convenient angle
         self.__ax.view_init(azim = 45, elev = 20)
@@ -79,12 +78,6 @@ class OrbitPlotter:
 
         # Plot the give body
         self.__plot_body()
-
-    '''
-    Function that returns the value to be shown in the toolbar on mouse hover
-    '''
-    def __format_coord(self, x, y):
-        return self.__info_text
 
     '''
     Private helper function to plot the body given in the plot function
@@ -281,9 +274,6 @@ class OrbitPlotter:
         # If there was only an inclination change
         else:
             maneuver_message = "Inclination Change"
-        
-        # Add info text about delta-v needed for this maneuver
-        self.__info_text += f"{craft.name} {maneuver_message}:\nΔV Needed: {maneuver.get_delta_v(self.body, initial_orbit) * 1000:.2f} m/s\n"
 
     '''
     Function to plot crafts and orbits. Takes an orbit and craft to plot. If given a manuever, the maneuver
