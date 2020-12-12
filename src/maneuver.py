@@ -31,6 +31,18 @@ class Maneuver:
 
         return abs(delta_v1) + abs(delta_v2)
 
+    def __calculate_combined_delta_v(self, body, initial_orbit, inclination_change):
+        # Calculate before and after semi-major axis
+        initial_semi_major_axis = initial_orbit.apogee + initial_orbit.perigee + body.radius
+        target_semi_major_axis = self.target_orbit.apogee + self.target_orbit.perigee + body.radius
+
+        # Calculate the initial and final orbital velocities
+        initial_vel = body.get_orbital_velocity(initial_orbit.apogee, initial_semi_major_axis)
+        final_vel = body.get_orbital_velocity(self.target_orbit.apogee, target_semi_major_axis)
+
+        # Return the result of the combined maneuver delta-v equation
+        return math.sqrt(initial_vel**2 + final_vel**2 - 2 * initial_vel * final_vel * np.cos(np.radians(inclination_change)))
+
     '''
     Private helper function that calculates the delta-v needed to do an inclination change. Takes the body being
     orbited, the initial orbit, and the inclination change between the initial and target orbit. Calculates inclination 
@@ -78,11 +90,46 @@ class Maneuver:
         # Initialize variable to hold total delta-v
         delta_v = 0
 
+        # Flags used to keep track of what kind of maneuver is being performed
+        transfer = False
+        has_inclination_change = False
+        only_circular = False
+
+        # Set inclination flag if there is an inclination change
+        if initial_orbit.inclination != self.target_orbit.inclination:
+            has_inclination_change = True
+
+        # If corresponding orbital elements are not the same, then flip the transfer flag
+        if initial_orbit.apogee != target_orbit.apogee or initial_orbit.perigee != target_orbit.perigee:
+            transfer = True
+
+        # If both orbits are circular, flip the only circular flag
+        if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
+            only_circular = True
+
+        # If there is only a Hohmann transfer
+        if transfer and not has_inclination_change:
+            print("ONLY HOHMANN")
+
+        # If there is only an inclination change
+        elif has_inclination_change and not transfer:
+            print("ONLY INCLINATION")
+
+        # If there is both an inclination change and a Hohmann transfer
+        elif transfer and has_inclination_change:
+            print("BOTH")
+
         # Check that initial and target orbit are both circular (required to do a Hohmann transfer)
         if initial_orbit.apogee == initial_orbit.perigee and self.target_orbit.apogee == self.target_orbit.perigee:
             
-            # Calculate total delta-v to perform this maneuver
+            # If transfer only
             delta_v = self.__calculate_hohmann_transfer_delta_v(body, initial_orbit)
+
+            # If inclination only
+            delta_v = self.__calculate_inclination_change_delta_v(body, initial_orbit, inclination_change)
+
+            # If transfer + inclination (should be less than Hohmann + inclination as two different things)
+            delta_v = self.__calculate_combined_delta_v(body, initial_orbit, inclination_change)
 
         # If an inclination change is needed, calculate inclination change delta-v at target orbit apogee
         if initial_orbit.inclination != self.target_orbit.inclination:
@@ -91,6 +138,6 @@ class Maneuver:
             inclination_change = self.target_orbit.inclination - initial_orbit.inclination
 
             # Add delta-v of inclination change to total delta-v
-            delta_v += self.__calculate_inclination_change_delta_v(body, initial_orbit, inclination_change)
+            delta_v = self.__calculate_inclination_change_delta_v(body, initial_orbit, inclination_change)
 
         return delta_v

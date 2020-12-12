@@ -5,7 +5,7 @@ craft = Craft("Satellite", "lime")
 
 
 initial_orbit = Orbit(400, 400, 0)
-target_orbit = Orbit(2000, 2000, 0)
+target_orbit = Orbit(2000, 2000, 45)
 maneuver = Maneuver(target_orbit, "firebrick")
 
 p = OrbitPlotter(body)

@@ -288,9 +288,10 @@ class OrbitPlotter:
     '''
     Function to plot crafts and orbits. Takes an orbit and craft to plot. If given a manuever, the maneuver
     will be plotted. plot_labgels indicates whether or not apogee/perigee lables will be plotted. legend indicates
-    whether or not the legend should be plotted
+    whether or not the legend should be plotted. The target orbit flag indicates whether or not this function is being
+    used to plot a target orbit after a maneuver
     '''
-    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True):
+    def plot(self, orbit, craft, maneuver = None, plot_labels = True, legend = True, target_orbit = False):
         # Plot the given body
         self.__plot_body()
 
@@ -309,8 +310,8 @@ class OrbitPlotter:
 
         # If eccentricity is sufficiently close to 1, plot a parabolic orbit
         if (1 - eccentricity < self.__EPSILON_E):
-            # If an elliptical orbit should be plotted but there is a maneuver, throw ValueError
-            if maneuver:
+            # If an elliptical orbit should be plotted but there is a maneuver or this is the target orbit of a maneuver, throw ValueError
+            if maneuver or target_orbit:
                 raise ValueError("Cannot perform manuevers when in parabolic escape orbit")
 
             self.__plot_parabolic_orbit(orbit, craft, semi_major_axis)
@@ -327,7 +328,7 @@ class OrbitPlotter:
             transferred_orbit = Orbit(maneuver.target_orbit.apogee, maneuver.target_orbit.perigee, maneuver.target_orbit.inclination)
 
             # After plotting manuever, plot orbit transferred into
-            self.plot(transferred_orbit, craft, None, False, False)
+            self.plot(transferred_orbit, craft, None, False, False, True)
 
         # Show legend for orbits of given craft if user wants to show legend
         if legend:
