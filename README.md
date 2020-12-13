@@ -1,5 +1,5 @@
 # :earth_americas: Pyrigee
-A python package for simulating orbits and calculating the delta-v needed to perform simple maneuvers.
+A python package for visualizing spacecraft orbits and orbital maneuvers.
 
 # :memo: Getting Started
 You can install Pyrigee directly using pip with this command:
