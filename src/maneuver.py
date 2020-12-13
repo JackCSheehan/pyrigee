@@ -9,9 +9,8 @@ Class that allows users to define maneuvers to a target orbit
 '''
 class Maneuver:
     '''
-    Takes the name of the new orbit (for legend purposes), an Orbit object
-    describing the new orbit, and a color to change appearance of maneuver 
-    in plot
+    Takes an Orbit object describing the new orbit, and a color to change
+    appearance of maneuver in plot
     '''
     def __init__(self, to, c):
         self.target_orbit = to
