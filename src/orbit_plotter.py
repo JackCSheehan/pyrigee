@@ -191,7 +191,7 @@ class OrbitPlotter:
         # Calculate the transfer orbit elements
         transfer_orbit, transfer_eccentricity, transfer_semi_major_axis = self.__calculator.calculate_transfer_orbit_elements(initial_orbit, target_orbit, self.body.radius)
 
-        # Plot half of an elliptical orbit to plot the Hohmann Transfer Orbit
+        # Plot half of an elliptical orbit to plot the Hohmann transfer orbit
         self.__plot_elliptical_orbit(transfer_orbit, craft, transfer_eccentricity, transfer_semi_major_axis, True, False, True, False, False, f"{craft.name} transfer")
 
     '''

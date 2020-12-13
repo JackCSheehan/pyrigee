@@ -182,7 +182,7 @@ class PlottingCalculator:
     '''
     Calculates the orbit, eccentricity, and semi-major axis of the in-between orbit. The in-between orbit is the orbit the
     spacecraft will be in after an inclination change to show how the spacecraft will transition between inclination changes
-    and Hohmann Transfer Orbits. Takes the initial orbit, the target orbit, and the radius of the body being orbited
+    and Hohmann transfer orbits. Takes the initial orbit, the target orbit, and the radius of the body being orbited
     '''
     def calculate_in_between_orbit_elements(self, initial_orbit, target_orbit, body_radius):
         # Variables to hold in-between apogee and perigee

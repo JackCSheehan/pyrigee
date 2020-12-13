@@ -11,13 +11,12 @@ class Body:
     __BIG_G = 6.67430e-20
 
     '''
-    Init function takes body mass, radius (in km), axial tilt (in degrees), and color
+    Init function takes body name, mass (in kg), radius (in km), and color
     '''
     def __init__(self, n, m, r, c):
         self.name = n
         self.mass = m
         self.radius = r
-
         self.color = c
 
     '''
