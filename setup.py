@@ -4,8 +4,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="jscs",
-    version="1.0",
+    name="pyrigee",
+    version="1.0.1",
     author="Jack Sheehan",
     description="A python package for visualizing spacecraft orbits and orbital maneuvers.",
     long_description=long_description,
