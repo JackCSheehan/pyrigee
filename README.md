@@ -17,7 +17,7 @@ $ pip install pyrigee
 
 Here is a quick demo program to introduce you to the basic Pyrigee class structure:
 ```
-from Pyrigee import *
+from pyrigee import *
 
 # Create a body. Give it a name, mass, radius, and display color
 body = Body("Earth", 5.9722e24, 6378, "cornflowerblue")
@@ -68,7 +68,7 @@ Pyrigee will plot Hohmann transfer Orbits, inclination changes, and combinations
 ## :straight_ruler: Simple Maneuvers (Basic Hohmann Transfer)
 
 ```
-from Pyrigee import *
+from pyrigee import *
 
 body = Body("Earth", 5.9722e24, 6378, "cornflowerblue")
 craft = Craft("Satellite", "lime")

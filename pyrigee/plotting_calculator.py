@@ -3,7 +3,7 @@ File containing the PlottingCalculator class
 '''
 import numpy as np
 import math
-from orbit import *
+from pyrigee.orbit import *
 
 '''
 The PlottingCalculator class contains functions that calculate coordinates for plotting
