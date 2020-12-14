@@ -4,9 +4,9 @@ File containing OrbitPlotter class definition
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-from orbit import *
-from craft import *
-from plotting_calculator import *
+from pyrigee.orbit import *
+from pyrigee.craft import *
+from pyrigee.plotting_calculator import *
 
 '''
 Class containing methods and constants that allows users to graph orbits
