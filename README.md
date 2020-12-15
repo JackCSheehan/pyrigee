@@ -1,5 +1,5 @@
 # :earth_americas: Pyrigee
-A python package for visualizing spacecraft orbits and orbital maneuvers.
+A Python package for visualizing spacecraft orbits and orbital maneuvers. Pyrigee is intended to be used as an educational tool to help in understanding spacecraft orbits.
 
 # :memo: Getting Started
 You can install Pyrigee directly using pip with this command:
