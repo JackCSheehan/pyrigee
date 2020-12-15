@@ -48,7 +48,7 @@ class OrbitPlotter:
         self.__info_text = ""
 
         # Standard matplotlib initialization items
-        self.__fig = plt.figure()
+        self.__fig = plt.figure("Pyrigee")
         self.__ax = self.__fig.add_subplot(111, projection = "3d")
 
         # Set default view to see planet from convenient angle
